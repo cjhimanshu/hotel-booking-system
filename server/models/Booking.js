@@ -31,8 +31,15 @@ const bookingSchema = mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["credit_card", "debit_card", "upi", "net_banking", "cash"],
-      default: "credit_card",
+      enum: [
+        "credit_card",
+        "debit_card",
+        "upi",
+        "net_banking",
+        "cash",
+        "razorpay",
+      ],
+      default: "razorpay",
     },
     guestDetails: {
       name: String,

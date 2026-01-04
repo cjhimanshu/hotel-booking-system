@@ -23,6 +23,21 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/rooms", require("./routes/roomRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
 
-app.listen(process.env.PORT, () =>
+try {
+  app.use("/api/payment", require("./routes/paymentRoutes"));
+  console.log("Payment routes loaded successfully");
+} catch (error) {
+  console.error("Error loading payment routes:", error.message);
+}
+
+const server = app.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}`)
-); 
+);
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});

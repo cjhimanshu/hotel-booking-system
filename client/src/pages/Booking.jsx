@@ -25,10 +25,11 @@ const Booking = () => {
   const [phoneError, setPhoneError] = useState("");
 
   // Step 3: Payment
-  const [paymentMethod, setPaymentMethod] = useState("credit_card");
+  const [paymentMethod, setPaymentMethod] = useState("razorpay");
 
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [nights, setNights] = useState(0);
+  // Calculate nights and totalPrice as derived values
+  const nights = checkIn && checkOut ? Math.ceil(Math.abs(new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24)) : 0;
+  const totalPrice = nights && room ? nights * room.price : 0;
 
   // Country codes list
   const countryCodes = [
@@ -240,40 +241,109 @@ const Booking = () => {
       });
   }, [id]);
 
-  useEffect(() => {
-    if (checkIn && checkOut && room) {
-      const start = new Date(checkIn);
-      const end = new Date(checkOut);
-      const diffTime = Math.abs(end - start);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      // Use a single setState to avoid cascading renders
-      const calculatedPrice = diffDays * room.price;
-      setNights(diffDays);
-      setTotalPrice(calculatedPrice);
-    }
-  }, [checkIn, checkOut, room?.price]);
 
   const handleBooking = async () => {
     try {
-      await API.post("/bookings", {
-        room: id,
-        checkIn,
-        checkOut,
-        numberOfGuests,
-        totalPrice,
-        paymentMethod,
-        guestDetails: {
-          name: guestName,
-          email: guestEmail,
-          phone: countryCode + " " + guestPhone,
-          specialRequests,
-        },
-      });
-      alert("Booking confirmed! Payment processed successfully.");
-      navigate("/my-bookings");
+      if (paymentMethod === "razorpay") {
+        // Create Razorpay order
+        const { data: orderData } = await API.post("/payment/create-order", {
+          amount: totalPrice,
+        });
+
+        // Get Razorpay key
+        const { data: keyData } = await API.get("/payment/key");
+
+        // Initialize Razorpay payment
+        const options = {
+          key: keyData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: "Luxury Stay Hotel",
+          description: `Booking for ${room.type}`,
+          order_id: orderData.id,
+          handler: async function (response) {
+            try {
+              // Verify payment
+              const { data: verifyData } = await API.post("/payment/verify", {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+
+              if (verifyData.success) {
+                // Create booking after successful payment
+                await API.post("/bookings", {
+                  room: id,
+                  checkIn,
+                  checkOut,
+                  numberOfGuests,
+                  totalPrice,
+                  paymentMethod: "razorpay",
+                  guestDetails: {
+                    name: guestName,
+                    email: guestEmail,
+                    phone: countryCode + " " + guestPhone,
+                    specialRequests,
+                    paymentId: response.razorpay_payment_id,
+                  },
+                });
+                alert("Booking confirmed! Payment processed successfully.");
+                navigate("/my-bookings");
+              }
+            } catch (error) {
+              console.error("Payment verification error:", error);
+              const errorMsg =
+                error.response?.data?.message ||
+                error.message ||
+                "Unknown error";
+              alert(
+                "Payment verification failed: " +
+                  errorMsg +
+                  "\nPlease contact support with your payment ID: " +
+                  response.razorpay_payment_id
+              );
+            }
+          },
+          prefill: {
+            name: guestName,
+            email: guestEmail,
+            contact: countryCode + guestPhone,
+          },
+          theme: {
+            color: "#D97706",
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function (response) {
+          alert("Payment failed: " + response.error.description);
+        });
+        rzp.open();
+      } else {
+        // Cash payment - create booking directly
+        await API.post("/bookings", {
+          room: id,
+          checkIn,
+          checkOut,
+          numberOfGuests,
+          totalPrice,
+          paymentMethod,
+          guestDetails: {
+            name: guestName,
+            email: guestEmail,
+            phone: countryCode + " " + guestPhone,
+            specialRequests,
+          },
+        });
+        alert("Booking confirmed! You can pay at the hotel.");
+        navigate("/my-bookings");
+      }
     } catch (error) {
       console.error("Error booking room", error);
-      alert("Error booking room");
+      alert(
+        "Error booking room: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
 
@@ -610,72 +680,20 @@ const Booking = () => {
                   <label className="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-amber-500 transition-all">
                     <input
                       type="radio"
-                      value="credit_card"
-                      checked={paymentMethod === "credit_card"}
+                      value="razorpay"
+                      checked={paymentMethod === "razorpay"}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="mr-4 w-5 h-5 text-amber-600"
                     />
                     <div className="flex-1">
                       <span className="font-semibold text-gray-800">
-                        Credit Card
+                        Pay Now (Razorpay)
                       </span>
                       <p className="text-sm text-gray-600">
-                        Pay securely with your credit card
+                        Credit/Debit Card, UPI, Net Banking, Wallet
                       </p>
                     </div>
                     <span className="text-2xl">💳</span>
-                  </label>
-                  <label className="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-amber-500 transition-all">
-                    <input
-                      type="radio"
-                      value="debit_card"
-                      checked={paymentMethod === "debit_card"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="mr-4 w-5 h-5 text-amber-600"
-                    />
-                    <div className="flex-1">
-                      <span className="font-semibold text-gray-800">
-                        Debit Card
-                      </span>
-                      <p className="text-sm text-gray-600">
-                        Pay with your debit card
-                      </p>
-                    </div>
-                    <span className="text-2xl">💳</span>
-                  </label>
-                  <label className="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-amber-500 transition-all">
-                    <input
-                      type="radio"
-                      value="upi"
-                      checked={paymentMethod === "upi"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="mr-4 w-5 h-5 text-amber-600"
-                    />
-                    <div className="flex-1">
-                      <span className="font-semibold text-gray-800">UPI</span>
-                      <p className="text-sm text-gray-600">
-                        Pay using UPI (PhonePe, Google Pay, Paytm)
-                      </p>
-                    </div>
-                    <span className="text-2xl">📱</span>
-                  </label>
-                  <label className="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-amber-500 transition-all">
-                    <input
-                      type="radio"
-                      value="net_banking"
-                      checked={paymentMethod === "net_banking"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="mr-4 w-5 h-5 text-amber-600"
-                    />
-                    <div className="flex-1">
-                      <span className="font-semibold text-gray-800">
-                        Net Banking
-                      </span>
-                      <p className="text-sm text-gray-600">
-                        Direct bank transfer
-                      </p>
-                    </div>
-                    <span className="text-2xl">🏦</span>
                   </label>
                   <label className="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-amber-500 transition-all">
                     <input

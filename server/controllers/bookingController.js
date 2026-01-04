@@ -67,3 +67,14 @@ exports.cancelBooking = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getAllBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("room")
+      .populate("user", "name email");
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
