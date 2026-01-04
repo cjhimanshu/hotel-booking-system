@@ -4,17 +4,22 @@ import API from "../services/api";
 
 const AdminDashboard = () => {
   const [rooms, setRooms] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingRoomId, setUploadingRoomId] = useState(null);
   const [uploadingImages, setUploadingImages] = useState([]);
 
   useEffect(() => {
-    API.get("/rooms")
-      .then((res) => {
-        setRooms(res.data);
+    Promise.all([API.get("/rooms"), API.get("/bookings/all")])
+      .then(([roomsRes, bookingsRes]) => {
+        setRooms(roomsRes.data);
+        setBookings(bookingsRes.data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+        setLoading(false);
+      });
   }, []);
 
   const deleteRoom = (id) => {
@@ -108,21 +113,169 @@ const AdminDashboard = () => {
             <div className="text-gray-600">Available Rooms</div>
           </div>
           <div className="bg-white rounded-xl shadow p-6">
-            <div className="text-3xl mb-2">🖼️</div>
-            <div className="text-3xl font-bold text-orange-600">
-              {rooms.filter((r) => !r.images || r.images.length === 0).length}
+            <div className="text-3xl mb-2">�</div>
+            <div className="text-3xl font-bold text-purple-600">
+              {bookings.filter((b) => b.status !== "cancelled").length}
             </div>
-            <div className="text-gray-600">No Images</div>
+            <div className="text-gray-600">Total Bookings</div>
           </div>
           <div className="bg-white rounded-xl shadow p-6">
             <div className="text-3xl mb-2">💰</div>
             <div className="text-3xl font-bold text-blue-600">
               ₹
-              {rooms
-                .reduce((sum, r) => sum + (r.price || 0), 0)
+              {bookings
+                .filter((b) => b.status !== "cancelled")
+                .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
                 .toLocaleString()}
             </div>
-            <div className="text-gray-600">Total Value/Night</div>
+            <div className="text-gray-600">Total Revenue</div>
+          </div>
+        </div>
+
+        {/* Booking Statistics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Category-wise Bookings */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">
+              Bookings by Room Type
+            </h3>
+            <div className="space-y-4">
+              {(() => {
+                const categoryStats = {};
+                bookings
+                  .filter((b) => b.status !== "cancelled" && b.room)
+                  .forEach((booking) => {
+                    const roomType = booking.room.type || "Unknown";
+                    if (!categoryStats[roomType]) {
+                      categoryStats[roomType] = { count: 0, revenue: 0 };
+                    }
+                    categoryStats[roomType].count += 1;
+                    categoryStats[roomType].revenue += booking.totalPrice || 0;
+                  });
+
+                return Object.entries(categoryStats).length > 0 ? (
+                  Object.entries(categoryStats).map(([type, stats]) => (
+                    <div
+                      key={type}
+                      className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                    >
+                      <div>
+                        <div className="font-semibold text-gray-800">
+                          {type}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {stats.count} bookings
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-blue-600">
+                          ₹{stats.revenue.toLocaleString()}
+                        </div>
+                        <div className="text-sm text-gray-500">revenue</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No bookings yet
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* Daily Bookings */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">
+              Today's Activity
+            </h3>
+            <div className="space-y-4">
+              {(() => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const todayBookings = bookings.filter((b) => {
+                  const bookingDate = new Date(b.createdAt);
+                  bookingDate.setHours(0, 0, 0, 0);
+                  return (
+                    bookingDate.getTime() === today.getTime() &&
+                    b.status !== "cancelled"
+                  );
+                });
+
+                const todayRevenue = todayBookings.reduce(
+                  (sum, b) => sum + (b.totalPrice || 0),
+                  0
+                );
+
+                const checkInsToday = bookings.filter((b) => {
+                  const checkIn = new Date(b.checkIn);
+                  checkIn.setHours(0, 0, 0, 0);
+                  return (
+                    checkIn.getTime() === today.getTime() &&
+                    b.status !== "cancelled"
+                  );
+                });
+
+                const checkOutsToday = bookings.filter((b) => {
+                  const checkOut = new Date(b.checkOut);
+                  checkOut.setHours(0, 0, 0, 0);
+                  return (
+                    checkOut.getTime() === today.getTime() &&
+                    b.status !== "cancelled"
+                  );
+                });
+
+                return (
+                  <>
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">📝</span>
+                        <div className="font-semibold text-gray-800">
+                          New Bookings
+                        </div>
+                      </div>
+                      <div className="text-3xl font-bold text-green-600">
+                        {todayBookings.length}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        ₹{todayRevenue.toLocaleString()} earned
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">🔑</span>
+                        <div className="font-semibold text-gray-800">
+                          Check-ins Today
+                        </div>
+                      </div>
+                      <div className="text-3xl font-bold text-blue-600">
+                        {checkInsToday.length}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Guests arriving
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">👋</span>
+                        <div className="font-semibold text-gray-800">
+                          Check-outs Today
+                        </div>
+                      </div>
+                      <div className="text-3xl font-bold text-orange-600">
+                        {checkOutsToday.length}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Guests departing
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         </div>
 
