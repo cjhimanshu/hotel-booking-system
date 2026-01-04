@@ -5,16 +5,25 @@ import { Link } from "react-router-dom";
 const Rooms = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
+    console.log("Fetching rooms from API...");
     API.get("/rooms")
       .then((res) => {
+        console.log("Rooms received:", res.data);
+        console.log("Number of rooms:", res.data.length);
         setRooms(res.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Error fetching rooms:", err);
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to fetch rooms. Please make sure the server is running."
+        );
         setLoading(false);
       });
   }, []);
@@ -63,10 +72,34 @@ const Rooms = () => {
       ? rooms
       : rooms.filter((room) => categorizeRoom(room.type) === selectedCategory);
 
+  console.log("Filtered rooms:", filteredRooms);
+  console.log("Selected category:", selectedCategory);
+  console.log("Total rooms:", rooms.length);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-2xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Unable to Load Rooms
+          </h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -278,6 +311,124 @@ const Rooms = () => {
                   </svg>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* About Section */}
+      <div id="about" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Image */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 to-amber-600/20 rounded-2xl transform rotate-3"></div>
+              <img
+                src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80"
+                alt="Luxury Hotel"
+                className="relative rounded-2xl shadow-2xl w-full h-[500px] object-cover"
+              />
+              <div className="absolute -bottom-6 -right-6 bg-white p-8 rounded-xl shadow-xl">
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-amber-600">15+</div>
+                  <div className="text-gray-600 font-medium mt-2">
+                    Years of Excellence
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Content */}
+            <div>
+              <p className="text-amber-600 text-sm uppercase tracking-[0.3em] mb-4 font-medium">
+                About Us
+              </p>
+              <h2 className="font-display text-5xl font-bold text-gray-900 mb-6">
+                Where Luxury Meets Comfort
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mb-8"></div>
+
+              <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                Welcome to Luxury Stay, where exceptional hospitality and
+                elegant accommodations combine to create an unforgettable
+                experience. For over 15 years, we've been dedicated to providing
+                our guests with world-class service and premium amenities.
+              </p>
+
+              <p className="text-gray-600 text-lg leading-relaxed mb-8">
+                Each of our meticulously designed rooms offers a sanctuary of
+                comfort, featuring modern amenities, breathtaking views, and
+                attention to every detail. Whether you're traveling for business
+                or pleasure, our commitment to excellence ensures your stay
+                exceeds expectations.
+              </p>
+
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">🏆</div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      Award Winning
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Recognized for excellence in hospitality
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">⭐</div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      5-Star Service
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Premium service around the clock
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">🌍</div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      Prime Location
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Heart of the city's attractions
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">💎</div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      Luxury Amenities
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Premium facilities and services
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href="#rooms"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all duration-300 uppercase tracking-widest text-sm shadow-lg hover:shadow-amber-500/50 hover:scale-105"
+              >
+                Explore Rooms
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </a>
             </div>
           </div>
         </div>

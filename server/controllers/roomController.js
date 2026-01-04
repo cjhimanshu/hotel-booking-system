@@ -29,13 +29,7 @@ exports.createRoom = async (req, res) => {
 
 exports.getRooms = async (req, res) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = 6;
-
-    const rooms = await Room.find()
-      .skip((page - 1) * limit)
-      .limit(limit);
-
+    const rooms = await Room.find();
     res.json(rooms);
   } catch (error) {
     res.status(500).json({ message: error.message });

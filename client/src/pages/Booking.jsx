@@ -334,7 +334,7 @@ const Booking = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 pt-28 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Progress Bar */}
         <div className="mb-8">
