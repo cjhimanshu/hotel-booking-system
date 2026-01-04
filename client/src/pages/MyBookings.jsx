@@ -47,7 +47,7 @@ const MyBookings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 pt-28 pb-6 px-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-gray-800">My Bookings</h1>
         <div className="space-y-6">

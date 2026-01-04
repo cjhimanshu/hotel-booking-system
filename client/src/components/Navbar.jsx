@@ -1,33 +1,53 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const location = useLocation();
+
+  // Use transparent navbar only on home page
+  const isHomePage = location.pathname === "/";
+  const navClasses = isHomePage
+    ? "absolute top-0 left-0 right-0 z-50 bg-transparent"
+    : "sticky top-0 left-0 right-0 z-50 bg-gray-900 shadow-lg";
+  const textClasses = isHomePage ? "text-white drop-shadow-lg" : "text-white";
+  const logoClasses = isHomePage ? "text-white drop-shadow-lg" : "text-white";
 
   return (
-    <nav className="absolute top-0 left-0 right-0 z-50 bg-transparent">
+    <nav className={navClasses}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center space-x-3">
             <span className="text-2xl">🏨</span>
-            <span className="text-2xl font-serif font-bold text-white drop-shadow-lg tracking-wider">
+            <span
+              className={`text-2xl font-serif font-bold tracking-wider ${logoClasses}`}
+            >
               LUXURY STAY
             </span>
           </Link>
 
           <div className="flex items-center space-x-8">
-            <Link
-              to="/"
-              className="text-white hover:text-amber-300 font-medium transition drop-shadow-lg uppercase tracking-widest text-sm"
-            >
-              Rooms
-            </Link>
+            {isHomePage ? (
+              <a
+                href="#rooms"
+                className={`hover:text-amber-300 font-medium transition uppercase tracking-widest text-sm ${textClasses}`}
+              >
+                Rooms
+              </a>
+            ) : (
+              <Link
+                to="/#rooms"
+                className={`hover:text-amber-300 font-medium transition uppercase tracking-widest text-sm ${textClasses}`}
+              >
+                Rooms
+              </Link>
+            )}
 
             {user && (
               <Link
                 to="/my-bookings"
-                className="text-white hover:text-amber-300 font-medium transition drop-shadow-lg uppercase tracking-widest text-sm"
+                className={`hover:text-amber-300 font-medium transition uppercase tracking-widest text-sm ${textClasses}`}
               >
                 My Bookings
               </Link>
@@ -36,7 +56,7 @@ const Navbar = () => {
             {user?.role === "admin" && (
               <Link
                 to="/admin"
-                className="text-white hover:text-amber-300 font-medium transition drop-shadow-lg uppercase tracking-widest text-sm"
+                className={`hover:text-amber-300 font-medium transition uppercase tracking-widest text-sm ${textClasses}`}
               >
                 Admin
               </Link>
@@ -46,7 +66,7 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="text-white hover:text-amber-300 font-medium transition drop-shadow-lg uppercase tracking-widest text-sm"
+                  className={`hover:text-amber-300 font-medium transition uppercase tracking-widest text-sm ${textClasses}`}
                 >
                   Login
                 </Link>
