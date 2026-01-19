@@ -30,14 +30,20 @@ try {
   console.error("Error loading payment routes:", error.message);
 }
 
-const server = app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`)
-);
+// For Vercel serverless
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  // For local development
+  const server = app.listen(process.env.PORT || 5000, () =>
+    console.log(`Server running on port ${process.env.PORT || 5000}`),
+  );
 
-process.on("uncaughtException", (error) => {
-  console.error("Uncaught Exception:", error);
-});
+  process.on("uncaughtException", (error) => {
+    console.error("Uncaught Exception:", error);
+  });
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-});
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  });
+}
