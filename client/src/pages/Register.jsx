@@ -8,14 +8,13 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
-    role: "user",
   });
   const [showPassword, setShowPassword] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/auth/register", form);
+      await API.post("/auth/register", { ...form, role: "user" });
       alert("Registration successful! Please login.");
       navigate("/login");
     } catch (error) {
@@ -122,23 +121,6 @@ const Register = () => {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Register As
-              </label>
-              <select
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-              >
-                <option value="user">👤 Guest/User</option>
-                <option value="admin">👑 Hotel Admin</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Select "Hotel Admin" if you are registering as hotel staff
-              </p>
             </div>
 
             <button
