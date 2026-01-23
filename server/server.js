@@ -14,19 +14,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Hotel Booking API is running" });
 });
 
-console.log("Attempting to connect to MongoDB...");
-console.log("MONGO_URI:", process.env.MONGO_URI ? "Set" : "NOT SET");
-
 mongoose
-  .connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 5000,
-  })
-  .then(() => {
-    console.log("✅ MongoDB Connected Successfully");
-  })
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => {
-    console.error("❌ MongoDB Connection Error:", err.message);
-    console.error("Full error:", err);
+    console.error("❌ MongoDB Error:", err.message);
+    process.exit(1);
   });
 
 app.use("/api/auth", require("./routes/authRoutes"));
