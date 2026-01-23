@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "client/dist",
   "builds": [
     {
       "src": "server/server.js",
@@ -16,7 +18,8 @@
       "dest": "server/server.js"
     },
     {
-      "handle": "filesystem"
+      "src": "/(.*\\..+)",
+      "dest": "client/dist/$1"
     },
     {
       "src": "/(.*)",
