@@ -2,7 +2,7 @@
   "name": "hotel-booking-system",
   "version": "1.0.0",
   "scripts": {
-    "vercel-build": "cd client && npm install && npm run build"
+    "vercel-build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client"
   },
   "dependencies": {
     "@mui/icons-material": "^7.3.6",

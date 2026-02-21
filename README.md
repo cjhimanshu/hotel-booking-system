@@ -224,46 +224,21 @@ hotel-booking-system/
 
 ---
 
-## 🌐 Deployment
+## 🌐 Deployment (Zero-Delay Free Tier)
 
-This application can be deployed as a monorepo or with separate deployments for frontend and backend.
+This application is configured to deploy as a **Full-Stack Vercel Monorepo**. This solves the "20 second delay" issue found on Render's free tier, as Vercel serverless functions wake up almost instantly.
 
-### Option 1: Monorepo Deployment (Vercel)
+### Quick Workflow:
 
-See [docs/vercel-setup.md](docs/vercel-setup.md) for detailed Vercel deployment instructions.
-
-Quick steps:
-
-1. Push code to GitHub
-2. Import project to Vercel
-3. Configure environment variables
-4. Deploy
-
-### Option 2: Separate Deployments
-
-**Frontend** (Vercel/Netlify):
-
-- Deploy the `client/` folder
-- Set `VITE_API_URL` to your backend URL
-
-**Backend** (Render/Railway/Heroku):
-
-- Deploy the `server/` folder
-- Configure environment variables
-- Update CORS settings
-
-See [docs/deployment-guide.md](docs/deployment-guide.md) for comprehensive deployment options.
-
----
-
-## 🔐 Security Notes
-
-- Never commit `.env` files to version control
-- Use strong JWT secrets in production
-- Enable MongoDB network access restrictions
-- Use HTTPS in production
-- Implement rate limiting for API endpoints
-- Validate and sanitize all user inputs
+1. **Push to GitHub**: Make sure all your code is pushed to your GitHub repository.
+2. **Import to Vercel**: Go to your Vercel dashboard and click "Add New Project" -> Import your GitHub repository.
+3. **Configure Settings**:
+   - **Framework Preset**: Leave it as "Other"
+   - **Root Directory**: Leave it as the root (`./`)
+   - **Build Command**: `npm run vercel-build`
+   - **Output Directory**: `client/dist`
+4. **Environment Variables**: Add all variables from your `server/.env` file directly into the Vercel dashboard. *(You do not need to add the `VITE_API_URL`, Vercel handles the relative routing automatically).*
+5. **Deploy**: Click Deploy! Your React frontend and Express backend will now run on the exact same Vercel domain with zero long cold-starts.
 
 ---
 
