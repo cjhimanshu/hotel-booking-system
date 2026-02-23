@@ -2,6 +2,7 @@ services:
   - type: web
     name: hotel-booking-backend
     env: node
+    rootDir: server
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -15,5 +16,5 @@ services:
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
-      - key: CLIENT_URL
+      - key: FRONTEND_URL
         sync: false
