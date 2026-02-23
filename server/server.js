@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-
 dotenv.config();
 const app = express();
 
@@ -18,6 +17,15 @@ const corsOptions = {
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
 
+    // Allow any Vercel preview/production deployment
+    if (/https:\/\/[a-z0-9-]+-[a-z0-9]+-[a-z0-9]+\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+    // Allow the main vercel.app domain for the project
+    if (/https:\/\/hotel-booking-system[a-z0-9-]*\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -28,7 +36,6 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
-
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
@@ -48,7 +55,6 @@ mongoose
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/rooms", require("./routes/roomRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
-
 try {
   app.use("/api/payment", require("./routes/paymentRoutes"));
   console.log("Payment routes loaded successfully");
@@ -60,15 +66,13 @@ try {
 if (process.env.VERCEL) {
   module.exports = app;
 } else {
-  // For local development
+  // For local development and Render
   const server = app.listen(process.env.PORT || 5000, () =>
     console.log(`Server running on port ${process.env.PORT || 5000}`),
   );
-
   process.on("uncaughtException", (error) => {
     console.error("Uncaught Exception:", error);
   });
-
   process.on("unhandledRejection", (reason, promise) => {
     console.error("Unhandled Rejection at:", promise, "reason:", reason);
   });
