@@ -2,10 +2,6 @@
     "version": 2,
     "builds": [
         {
-            "src": "server/server.js",
-            "use": "@vercel/node"
-        },
-        {
             "src": "client/package.json",
             "use": "@vercel/static-build",
             "config": {
@@ -13,17 +9,14 @@
             }
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "/server/server.js"
+            "source": "/api/:path*",
+            "destination": "https://hotel-booking-system-1-fnsh.onrender.com/api/:path*"
         },
         {
-            "handle": "filesystem"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/client/index.html"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
