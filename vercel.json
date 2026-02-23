@@ -9,14 +9,21 @@
             }
         }
     ],
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/:path*",
-            "destination": "https://hotel-booking-system-1-fnsh.onrender.com/api/:path*"
+            "src": "/api/(.*)",
+            "dest": "https://hotel-booking-system-1-fnsh.onrender.com/api/$1"
         },
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "/uploads/(.*)",
+            "dest": "https://hotel-booking-system-1-fnsh.onrender.com/uploads/$1"
+        },
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
 }
