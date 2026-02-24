@@ -2,7 +2,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 dotenv.config();
+
+// Ensure uploads directory exists (important for Render deployments)
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const app = express();
 
 // CORS Configuration
