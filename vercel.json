@@ -1,19 +1,29 @@
 {
     "version": 2,
-    "buildCommand": "cd client && npm install && npm run build",
-    "outputDirectory": "client/dist",
-    "rewrites": [
+    "builds": [
         {
-            "source": "/api/:path*",
-            "destination": "https://hotel-booking-system-1-fnsh.onrender.com/api/:path*"
+            "src": "client/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "https://hotel-booking-system-1-fnsh.onrender.com/api/$1"
         },
         {
-            "source": "/uploads/:path*",
-            "destination": "https://hotel-booking-system-1-fnsh.onrender.com/uploads/:path*"
+            "src": "/uploads/(.*)",
+            "dest": "https://hotel-booking-system-1-fnsh.onrender.com/uploads/$1"
         },
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
 }
