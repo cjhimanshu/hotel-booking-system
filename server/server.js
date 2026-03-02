@@ -53,6 +53,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Hotel Booking API is running" });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
+});
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
