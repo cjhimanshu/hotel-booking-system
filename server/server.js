@@ -66,7 +66,6 @@ app.use("/api/rooms", require("./routes/roomRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
 try {
   app.use("/api/payment", require("./routes/paymentRoutes"));
-  console.log("Payment routes loaded successfully");
 } catch (error) {
   console.error("Error loading payment routes:", error.message);
 }

@@ -9,11 +9,8 @@ const Rooms = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
-    console.log("Fetching rooms from API...");
     API.get("/rooms")
       .then((res) => {
-        console.log("Rooms received:", res.data);
-        console.log("Number of rooms:", res.data.length);
         setRooms(res.data);
         setLoading(false);
       })
@@ -71,10 +68,6 @@ const Rooms = () => {
     selectedCategory === "all"
       ? rooms
       : rooms.filter((room) => categorizeRoom(room.type) === selectedCategory);
-
-  console.log("Filtered rooms:", filteredRooms);
-  console.log("Selected category:", selectedCategory);
-  console.log("Total rooms:", rooms.length);
 
   if (loading) {
     return (

@@ -10,7 +10,6 @@ const MyBookings = () => {
     setLoading(true);
     API.get("/bookings/user")
       .then((res) => {
-        console.log("Fetched bookings:", res.data);
         setBookings(res.data);
         setLoading(false);
       })

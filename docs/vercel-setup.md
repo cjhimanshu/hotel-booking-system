@@ -32,10 +32,11 @@ Go to Settings → Environment Variables and add:
 **Production Environment Variables:**
 
 ```
-MONGO_URI=mongodb+srv://cjhimanshu49_db_user:12345@cluster0.0ei2jqf.mongodb.net/?appName=Cluster0
-JWT_SECRET=supersecretkey
-RAZORPAY_KEY_ID=rzp_test_RztWycUn9lABDY
-RAZORPAY_KEY_SECRET=IZDOjoPb21hNS2h1b3IoTkT4
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_strong_jwt_secret
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+RESEND_API_KEY=re_your_resend_api_key
 PORT=5000
 ```
 

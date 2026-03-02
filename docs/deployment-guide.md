@@ -65,10 +65,11 @@ If you want both on Vercel:
 2. **Environment Variables** - Add ALL of these:
 
    ```
-   MONGO_URI=your_mongodb_uri
-   JWT_SECRET=supersecretkey
-   RAZORPAY_KEY_ID=rzp_test_RztWycUn9lABDY
-   RAZORPAY_KEY_SECRET=your_secret
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_strong_jwt_secret
+   RAZORPAY_KEY_ID=your_razorpay_key_id
+   RAZORPAY_KEY_SECRET=your_razorpay_secret
+   RESEND_API_KEY=re_your_resend_api_key
    PORT=5000
    NODE_VERSION=18.x
    ```
