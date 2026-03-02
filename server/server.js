@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Ensure uploads directory exists (important for Render deployments)
 const uploadsDir = path.join(__dirname, "uploads");

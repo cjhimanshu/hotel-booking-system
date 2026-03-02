@@ -14,11 +14,11 @@ const AddRoom = () => {
   const [selectedPresetImage, setSelectedPresetImage] = useState("");
   const [imagePreviews, setImagePreviews] = useState([]);
 
-  // Luxury room presets
+  // Luxury room presets (4-star competitive pricing for India)
   const luxuryRoomTypes = [
     {
       type: "Presidential Suite",
-      price: 35000,
+      price: 15000,
       guests: 4,
       category: "Ultra Luxury",
       image:
@@ -26,7 +26,7 @@ const AddRoom = () => {
     },
     {
       type: "Royal Suite",
-      price: 32000,
+      price: 13000,
       guests: 4,
       category: "Ultra Luxury",
       image:
@@ -34,7 +34,7 @@ const AddRoom = () => {
     },
     {
       type: "Penthouse Suite",
-      price: 40000,
+      price: 18000,
       guests: 5,
       category: "Ultra Luxury",
       image:
@@ -42,7 +42,7 @@ const AddRoom = () => {
     },
     {
       type: "Executive Suite",
-      price: 18000,
+      price: 8000,
       guests: 2,
       category: "Premium",
       image:
@@ -50,7 +50,7 @@ const AddRoom = () => {
     },
     {
       type: "Sultan Suite",
-      price: 38000,
+      price: 16000,
       guests: 4,
       category: "Ultra Luxury",
       image:
@@ -58,7 +58,7 @@ const AddRoom = () => {
     },
     {
       type: "Opulent Oasis",
-      price: 28000,
+      price: 11000,
       guests: 3,
       category: "Luxury",
       image:
@@ -66,7 +66,7 @@ const AddRoom = () => {
     },
     {
       type: "Majestic Manor",
-      price: 30000,
+      price: 12000,
       guests: 4,
       category: "Luxury",
       image:
@@ -74,7 +74,7 @@ const AddRoom = () => {
     },
     {
       type: "Crystal Cove",
-      price: 22000,
+      price: 9000,
       guests: 3,
       category: "Premium",
       image:
@@ -82,7 +82,7 @@ const AddRoom = () => {
     },
     {
       type: "Platinum Paradise",
-      price: 26000,
+      price: 10500,
       guests: 3,
       category: "Luxury",
       image:
@@ -90,7 +90,7 @@ const AddRoom = () => {
     },
     {
       type: "Imperial Suite",
-      price: 42000,
+      price: 20000,
       guests: 5,
       category: "Ultra Luxury",
       image:
@@ -98,7 +98,7 @@ const AddRoom = () => {
     },
     {
       type: "Maharaja Suite",
-      price: 35000,
+      price: 14000,
       guests: 4,
       category: "Luxury",
       image:
@@ -106,7 +106,7 @@ const AddRoom = () => {
     },
     {
       type: "Honeymoon Paradise",
-      price: 20000,
+      price: 8500,
       guests: 2,
       category: "Romance",
       image:
@@ -114,7 +114,7 @@ const AddRoom = () => {
     },
     {
       type: "Couple's Premium Retreat",
-      price: 16000,
+      price: 6500,
       guests: 2,
       category: "Romance",
       image:
@@ -122,7 +122,7 @@ const AddRoom = () => {
     },
     {
       type: "City View Deluxe",
-      price: 12000,
+      price: 5000,
       guests: 2,
       category: "Standard",
       image:
@@ -130,7 +130,7 @@ const AddRoom = () => {
     },
     {
       type: "Ocean Breeze Suite",
-      price: 24000,
+      price: 9500,
       guests: 3,
       category: "Premium",
       image:
@@ -138,7 +138,7 @@ const AddRoom = () => {
     },
     {
       type: "Garden View Room",
-      price: 10000,
+      price: 3500,
       guests: 2,
       category: "Standard",
       image:
@@ -146,7 +146,7 @@ const AddRoom = () => {
     },
     {
       type: "Royal Family Suite",
-      price: 28000,
+      price: 11500,
       guests: 5,
       category: "Family",
       image:
@@ -154,7 +154,7 @@ const AddRoom = () => {
     },
     {
       type: "Single Bed Classic",
-      price: 5000,
+      price: 2500,
       guests: 1,
       category: "Standard",
       image:
@@ -353,7 +353,7 @@ const AddRoom = () => {
 
                       // Create preview URLs for uploaded images
                       const previews = files.map((file) =>
-                        URL.createObjectURL(file)
+                        URL.createObjectURL(file),
                       );
                       setImagePreviews(previews);
 
