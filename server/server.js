@@ -68,6 +68,7 @@ mongoose
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/rooms", require("./routes/roomRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
+app.use("/api/verify", require("./routes/verificationRoutes"));
 try {
   app.use("/api/payment", require("./routes/paymentRoutes"));
 } catch (error) {
