@@ -24,19 +24,13 @@ const Booking = () => {
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
 
-  // OTP verification states
+  // OTP verification states (email only)
   const [emailVerified, setEmailVerified] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
-  const [phoneOtpSent, setPhoneOtpSent] = useState(false);
   const [emailOtpInput, setEmailOtpInput] = useState("");
-  const [phoneOtpInput, setPhoneOtpInput] = useState("");
   const [emailSending, setEmailSending] = useState(false);
-  const [phoneSending, setPhoneSending] = useState(false);
   const [emailVerifying, setEmailVerifying] = useState(false);
-  const [phoneVerifying, setPhoneVerifying] = useState(false);
   const [emailOtpError, setEmailOtpError] = useState("");
-  const [phoneOtpError, setPhoneOtpError] = useState("");
 
   // Step 3: Payment
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
@@ -380,8 +374,9 @@ const Booking = () => {
         alert("Please verify your email address with OTP");
         return;
       }
-      if (!phoneVerified) {
-        alert("Please verify your phone number with OTP");
+      const digitsOnly = guestPhone.replace(/\D/g, "");
+      if (digitsOnly.length < 10) {
+        setPhoneError("Phone number must contain at least 10 digits");
         return;
       }
       setEmailError("");
@@ -402,13 +397,9 @@ const Booking = () => {
   const handlePhoneChange = (e) => {
     setGuestPhone(e.target.value);
     setPhoneError("");
-    setPhoneVerified(false);
-    setPhoneOtpSent(false);
-    setPhoneOtpInput("");
-    setPhoneOtpError("");
   };
 
-  // Auto-load verified contacts when reaching step 2
+  // Auto-load verified email when reaching step 2
   useEffect(() => {
     if (step === 2) {
       API.get("/verify/verified-contacts")
@@ -416,14 +407,6 @@ const Booking = () => {
           if (res.data.verifiedEmail) {
             setGuestEmail(res.data.verifiedEmail);
             setEmailVerified(true);
-          }
-          if (res.data.verifiedPhone) {
-            const parts = res.data.verifiedPhone.split(" ");
-            if (parts.length >= 2) {
-              setCountryCode(parts[0]);
-              setGuestPhone(parts.slice(1).join(" "));
-            }
-            setPhoneVerified(true);
           }
         })
         .catch(() => {});
@@ -473,50 +456,7 @@ const Booking = () => {
     }
   };
 
-  const handleSendPhoneOtp = async () => {
-    if (!guestPhone) return;
-    const digitsOnly = guestPhone.replace(/\D/g, "");
-    if (digitsOnly.length < 10) {
-      setPhoneError("Phone number must contain at least 10 digits");
-      return;
-    }
-    setPhoneSending(true);
-    setPhoneOtpError("");
-    try {
-      const fullPhone = countryCode + " " + guestPhone;
-      const res = await API.post("/verify/send-phone-otp", {
-        phone: fullPhone,
-      });
-      if (res.data.alreadyVerified) {
-        setPhoneVerified(true);
-      } else {
-        setPhoneOtpSent(true);
-      }
-    } catch (err) {
-      setPhoneOtpError(err.response?.data?.message || "Failed to send OTP");
-    } finally {
-      setPhoneSending(false);
-    }
-  };
 
-  const handleVerifyPhoneOtp = async () => {
-    if (!phoneOtpInput) return;
-    setPhoneVerifying(true);
-    setPhoneOtpError("");
-    try {
-      const fullPhone = countryCode + " " + guestPhone;
-      await API.post("/verify/verify-phone-otp", {
-        phone: fullPhone,
-        otp: phoneOtpInput,
-      });
-      setPhoneVerified(true);
-      setPhoneOtpSent(false);
-    } catch (err) {
-      setPhoneOtpError(err.response?.data?.message || "Invalid OTP");
-    } finally {
-      setPhoneVerifying(false);
-    }
-  };
 
   const prevStep = () => setStep(step - 1);
 
@@ -791,23 +731,15 @@ const Booking = () => {
                     )}
                   </div>
 
-                  {/* Phone with OTP */}
+                  {/* Phone Number */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Phone Number *
-                      {phoneVerified && (
-                        <span className="ml-2 text-green-600">✓ Verified</span>
-                      )}
                     </label>
                     <div className="flex gap-2">
                       <select
                         value={countryCode}
-                        onChange={(e) => {
-                          setCountryCode(e.target.value);
-                          setPhoneVerified(false);
-                          setPhoneOtpSent(false);
-                        }}
-                        disabled={phoneVerified}
+                        onChange={(e) => setCountryCode(e.target.value)}
                         className="border-2 border-gray-300 px-3 py-3 rounded-lg focus:border-amber-500 focus:outline-none bg-white"
                         style={{ minWidth: "140px" }}
                       >
@@ -825,74 +757,17 @@ const Booking = () => {
                         value={guestPhone}
                         onChange={handlePhoneChange}
                         placeholder="98765 43210"
-                        disabled={phoneVerified}
                         className={`flex-1 border-2 px-4 py-3 rounded-lg focus:outline-none ${
-                          phoneVerified
-                            ? "border-green-500 bg-green-50 text-green-800"
-                            : phoneError
-                              ? "border-red-500 focus:border-red-500"
-                              : "border-gray-300 focus:border-amber-500"
+                          phoneError
+                            ? "border-red-500 focus:border-red-500"
+                            : "border-gray-300 focus:border-amber-500"
                         }`}
                         required
                       />
-                      {!phoneVerified && (
-                        <button
-                          type="button"
-                          onClick={handleSendPhoneOtp}
-                          disabled={phoneSending || !guestPhone}
-                          className="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                        >
-                          {phoneSending
-                            ? "Sending..."
-                            : phoneOtpSent
-                              ? "Resend"
-                              : "Send OTP"}
-                        </button>
-                      )}
-                      {phoneVerified && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPhoneVerified(false);
-                            setPhoneOtpSent(false);
-                            setPhoneOtpInput("");
-                          }}
-                          className="px-4 py-3 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 text-sm font-semibold"
-                        >
-                          Change
-                        </button>
-                      )}
                     </div>
                     {phoneError && (
                       <p className="mt-1 text-sm text-red-600 font-semibold">
                         {phoneError}
-                      </p>
-                    )}
-                    {phoneOtpSent && !phoneVerified && (
-                      <div className="mt-2 flex gap-2">
-                        <input
-                          type="text"
-                          value={phoneOtpInput}
-                          onChange={(e) => setPhoneOtpInput(e.target.value)}
-                          placeholder="Enter 6-digit OTP"
-                          maxLength={6}
-                          className="flex-1 border-2 border-amber-400 px-4 py-2 rounded-lg focus:border-amber-600 focus:outline-none tracking-widest text-center text-lg font-bold"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleVerifyPhoneOtp}
-                          disabled={
-                            phoneVerifying || phoneOtpInput.length !== 6
-                          }
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-sm disabled:opacity-50"
-                        >
-                          {phoneVerifying ? "Verifying..." : "Verify"}
-                        </button>
-                      </div>
-                    )}
-                    {phoneOtpError && (
-                      <p className="mt-1 text-sm text-red-600 font-semibold">
-                        {phoneOtpError}
                       </p>
                     )}
                   </div>
@@ -920,7 +795,7 @@ const Booking = () => {
                   </button>
                   <button
                     onClick={nextStep}
-                    disabled={!emailVerified || !phoneVerified || !guestName}
+                    disabled={!emailVerified || !guestName}
                     className="w-2/3 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 rounded-lg hover:from-amber-700 hover:to-orange-700 font-semibold text-lg transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continue to Payment
