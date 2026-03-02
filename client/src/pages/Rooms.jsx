@@ -19,7 +19,7 @@ const Rooms = () => {
         setError(
           err.response?.data?.message ||
             err.message ||
-            "Failed to fetch rooms. Please make sure the server is running."
+            "Failed to fetch rooms. Please make sure the server is running.",
         );
         setLoading(false);
       });
