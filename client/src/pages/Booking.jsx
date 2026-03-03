@@ -42,7 +42,6 @@ const Booking = () => {
       : 0;
   const totalPrice = nights && room ? nights * room.price : 0;
 
-
   useEffect(() => {
     API.get(`/rooms/${id}`)
       .then((res) => {
@@ -183,8 +182,6 @@ const Booking = () => {
     setEmailOtpError("");
   };
 
-
-
   // Auto-load verified email when reaching step 2
   useEffect(() => {
     if (step === 2) {
@@ -241,8 +238,6 @@ const Booking = () => {
       setEmailVerifying(false);
     }
   };
-
-
 
   const prevStep = () => setStep(step - 1);
 
@@ -436,7 +431,9 @@ const Booking = () => {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Email Address *
                       {emailVerified && (
-                        <span className="ml-2 text-green-600">âœ“ Verified</span>
+                        <span className="ml-2 text-green-600">
+                          âœ“ Verified
+                        </span>
                       )}
                     </label>
                     <div className="flex gap-2">
@@ -516,8 +513,6 @@ const Booking = () => {
                       </p>
                     )}
                   </div>
-
-
 
                   {/* Special Requests */}
                   <div>
