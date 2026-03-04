@@ -31,6 +31,18 @@ const Booking = () => {
 
   // Step 3: Payment
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Dynamically load Razorpay checkout script if not already present
+  const loadRazorpayScript = () =>
+    new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
 
   // Calculate nights and totalPrice as derived values
   const nights =
@@ -53,17 +65,28 @@ const Booking = () => {
   }, [id]);
 
   const handleBooking = async () => {
-    try {
-      if (paymentMethod === "razorpay") {
-        // Create Razorpay order
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    if (paymentMethod === "razorpay") {
+      // ── Razorpay path ─────────────────────────────────────────────────────
+      // isProcessing is reset inside every Razorpay callback, NOT in finally,
+      // because rzp.open() is non-blocking (popup stays open asynchronously).
+      try {
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded) {
+          alert(
+            "Failed to load Razorpay payment gateway. Please check your internet connection and try again.",
+          );
+          setIsProcessing(false);
+          return;
+        }
+
         const { data: orderData } = await API.post("/payment/create-order", {
           amount: totalPrice,
         });
-
-        // Get Razorpay key
         const { data: keyData } = await API.get("/payment/key");
 
-        // Initialize Razorpay payment
         const options = {
           key: keyData.key,
           amount: orderData.amount,
@@ -73,15 +96,12 @@ const Booking = () => {
           order_id: orderData.id,
           handler: async function (response) {
             try {
-              // Verify payment
               const { data: verifyData } = await API.post("/payment/verify", {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
               });
-
               if (verifyData.success) {
-                // Create booking after successful payment
                 await API.post("/bookings", {
                   room: id,
                   checkIn,
@@ -97,38 +117,50 @@ const Booking = () => {
                   },
                 });
                 alert("Booking confirmed! Payment processed successfully.");
+                setIsProcessing(false);
                 navigate("/my-bookings");
               }
             } catch (error) {
               console.error("Payment verification error:", error);
-              const errorMsg =
-                error.response?.data?.message ||
-                error.message ||
-                "Unknown error";
               alert(
                 "Payment verification failed: " +
-                  errorMsg +
+                  (error.response?.data?.message || error.message) +
                   "\nPlease contact support with your payment ID: " +
                   response.razorpay_payment_id,
               );
+              setIsProcessing(false);
             }
           },
-          prefill: {
-            name: guestName,
-            email: guestEmail,
+          modal: {
+            ondismiss: function () {
+              // User closed the popup without paying
+              setIsProcessing(false);
+            },
           },
-          theme: {
-            color: "#D97706",
-          },
+          prefill: { name: guestName, email: guestEmail },
+          theme: { color: "#D97706" },
         };
 
         const rzp = new window.Razorpay(options);
         rzp.on("payment.failed", function (response) {
           alert("Payment failed: " + response.error.description);
+          setIsProcessing(false);
         });
         rzp.open();
-      } else {
-        // Cash payment - create booking directly
+        // ⚠ Do NOT reset isProcessing here — the popup is still open.
+        // Each callback above handles it.
+      } catch (error) {
+        // Errors during setup (create-order / get-key API calls)
+        console.error("Error initiating payment:", error);
+        alert(
+          "Could not initiate payment: " +
+            (error.response?.data?.message || error.message),
+        );
+        setIsProcessing(false);
+      }
+    } else {
+      // ── Cash payment path ─────────────────────────────────────────────────
+      try {
         await API.post("/bookings", {
           room: id,
           checkIn,
@@ -144,13 +176,15 @@ const Booking = () => {
         });
         alert("Booking confirmed! You can pay at the hotel.");
         navigate("/my-bookings");
+      } catch (error) {
+        console.error("Error booking room:", error);
+        alert(
+          "Error booking room: " +
+            (error.response?.data?.message || error.message),
+        );
+      } finally {
+        setIsProcessing(false);
       }
-    } catch (error) {
-      console.error("Error booking room", error);
-      alert(
-        "Error booking room: " +
-          (error.response?.data?.message || error.message),
-      );
     }
   };
 
@@ -688,10 +722,6 @@ const Booking = () => {
                         <span className="font-semibold">Email:</span>{" "}
                         {guestEmail}
                       </p>
-                      <p className="text-gray-700">
-                        <span className="font-semibold">Phone:</span>{" "}
-                        {guestPhone}
-                      </p>
                       {specialRequests && (
                         <p className="text-gray-700">
                           <span className="font-semibold">
@@ -730,9 +760,36 @@ const Booking = () => {
                   </button>
                   <button
                     onClick={handleBooking}
-                    className="w-2/3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-lg hover:from-green-700 hover:to-emerald-700 font-semibold text-lg transition-all shadow-lg"
+                    disabled={isProcessing}
+                    className="w-2/3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-lg hover:from-green-700 hover:to-emerald-700 font-semibold text-lg transition-all shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Confirm & Pay ₹{totalPrice}
+                    {isProcessing ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          ></path>
+                        </svg>
+                        Processing...
+                      </>
+                    ) : (
+                      `Confirm & Pay ₹${totalPrice}`
+                    )}
                   </button>
                 </div>
               </div>

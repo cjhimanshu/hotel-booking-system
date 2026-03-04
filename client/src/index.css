@@ -46,3 +46,99 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #b8935e;
 }
+
+/* ─── KEYFRAMES (work on all screen sizes including mobile) ─── */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  50%       { box-shadow: 0 0 20px 6px rgba(245, 158, 11, 0.2); }
+}
+
+/* ─── ANIMATION UTILITY CLASSES ─── */
+
+.animate-fade-in-up   { animation: fadeInUp   0.7s ease both; }
+.animate-fade-in      { animation: fadeIn      0.6s ease both; }
+.animate-fade-in-down { animation: fadeInDown  0.6s ease both; }
+.animate-slide-in-left  { animation: slideInLeft  0.6s ease both; }
+.animate-slide-in-right { animation: slideInRight 0.6s ease both; }
+.animate-float        { animation: float       3s ease-in-out infinite; }
+.animate-scale-in     { animation: scaleIn     0.5s ease both; }
+.animate-pulse-glow   { animation: pulseGlow   2s ease-in-out infinite; }
+
+/* Staggered delay helpers */
+.animation-delay-100  { animation-delay: 100ms; }
+.animation-delay-200  { animation-delay: 200ms; }
+.animation-delay-300  { animation-delay: 300ms; }
+.animation-delay-400  { animation-delay: 400ms; }
+.animation-delay-500  { animation-delay: 500ms; }
+.animation-delay-600  { animation-delay: 600ms; }

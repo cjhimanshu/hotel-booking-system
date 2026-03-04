@@ -180,7 +180,7 @@ const Rooms = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Luxury Rooms Card */}
-            <div className="group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:-translate-y-2">
+            <div className="animate-fade-in-up animation-delay-100 group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:-translate-y-2">
               <div className="h-64 overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <img
@@ -222,7 +222,7 @@ const Rooms = () => {
             </div>
 
             {/* Fine Dining Card */}
-            <div className="group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:-translate-y-2">
+            <div className="animate-fade-in-up animation-delay-300 group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:-translate-y-2">
               <div className="h-64 overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <img
@@ -265,7 +265,7 @@ const Rooms = () => {
             </div>
 
             {/* Premium Facilities Card */}
-            <div className="group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:-translate-y-2">
+            <div className="animate-fade-in-up animation-delay-500 group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:-translate-y-2">
               <div className="h-64 overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <img
@@ -314,7 +314,7 @@ const Rooms = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Side - Image */}
-            <div className="relative">
+            <div className="animate-slide-in-left relative">
               <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 to-amber-600/20 rounded-2xl transform rotate-3"></div>
               <img
                 src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80"
@@ -332,7 +332,7 @@ const Rooms = () => {
             </div>
 
             {/* Right Side - Content */}
-            <div>
+            <div className="animate-slide-in-right">
               <p className="text-amber-600 text-sm uppercase tracking-[0.3em] mb-4 font-medium">
                 About Us
               </p>
