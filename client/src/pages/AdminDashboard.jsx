@@ -77,18 +77,18 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">
+              <h1 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">
                 Admin Dashboard
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-sm sm:text-base">
                 Manage your hotel rooms and bookings
               </p>
             </div>
             <Link
               to="/admin/add-room"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
+              className="bg-blue-600 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <span className="text-xl">+</span>
               Add New Room
@@ -205,7 +205,7 @@ const AdminDashboard = () => {
 
                 const todayRevenue = todayBookings.reduce(
                   (sum, b) => sum + (b.totalPrice || 0),
-                  0
+                  0,
                 );
 
                 const checkInsToday = bookings.filter((b) => {
@@ -304,15 +304,15 @@ const AdminDashboard = () => {
                 return (
                   <div
                     key={room._id}
-                    className={`p-6 transition-colors duration-200 ${
+                    className={`p-4 sm:p-6 transition-colors duration-200 ${
                       hasNoImages
                         ? "bg-orange-50 hover:bg-orange-100"
                         : "hover:bg-gray-50"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                       {/* Image Preview or Placeholder */}
-                      <div className="flex-shrink-0">
+                      <div className="flex-shrink-0 self-start">
                         {room.images && room.images.length > 0 ? (
                           <img
                             src={room.images[0]}
@@ -388,7 +388,7 @@ const AdminDashboard = () => {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:flex-col md:flex-row">
                         {hasNoImages &&
                           (uploadingRoomId === room._id ? (
                             <div className="flex flex-col gap-2">
@@ -419,7 +419,7 @@ const AdminDashboard = () => {
                           ) : (
                             <button
                               onClick={() => setUploadingRoomId(room._id)}
-                              className="bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600 transition-colors duration-200 flex items-center gap-2"
+                              className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-orange-600 transition-colors duration-200 flex items-center gap-2 w-full sm:w-auto justify-center"
                             >
                               <span>📸</span>
                               Add Image
@@ -427,7 +427,7 @@ const AdminDashboard = () => {
                           ))}
                         <button
                           onClick={() => deleteRoom(room._id)}
-                          className="bg-red-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200"
+                          className="bg-red-500 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200 w-full sm:w-auto"
                         >
                           Delete
                         </button>

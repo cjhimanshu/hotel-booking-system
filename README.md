@@ -1,287 +1,128 @@
-# 🏨 Hotel Booking System
+# Hotel Booking System
 
-A full-stack hotel booking application with integrated payment processing, user authentication, and admin management capabilities.
+  Hotel booking web app built using the MERN stack. I built it to learn how real-world booking systems work, from user login and room management to actual payment processing with Razorpay.
 
-## 🚀 Overview
+The app is fully deployed and working. You can create an account, browse rooms, book one with real payment (test mode), and also manage everything from an admin panel.
 
-This is a modern hotel booking system built with the MERN stack (MongoDB, Express.js, React, Node.js) that allows users to browse available rooms, make reservations, and process payments online. Administrators can manage rooms, view bookings, and track revenue through an intuitive dashboard.
-
-### ✨ Key Features
-
-- **User Authentication** - Secure registration and login with JWT tokens
-- **Room Browsing** - View available hotel rooms with images, descriptions, and pricing
-- **Real-time Booking** - Check room availability and make instant reservations
-- **Payment Integration** - Razorpay payment gateway for secure online transactions
-- **Admin Dashboard** - Manage rooms, view all bookings, and monitor occupancy
-- **Booking Management** - Users can view their booking history and status
-- **Image Uploads** - Admin can upload room images with automatic file handling
-- **Responsive Design** - Mobile-friendly interface built with React and Tailwind CSS
+Live demo: https://hotel-booking-system-eight-self.vercel.app
 
 ---
 
-## 🛠️ Tech Stack
+## What it does
 
-### Frontend
-
-- **React** - UI library for building interactive interfaces
-- **Vite** - Fast build tool and development server
-- **React Router** - Client-side routing
-- **Tailwind CSS** - Utility-first CSS framework
-- **Material-UI** - React component library
-- **Axios** - HTTP client for API requests
-
-### Backend
-
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web application framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB object modeling
-- **JWT** - JSON Web Tokens for authentication
-- **Razorpay** - Payment gateway integration
-- **Multer** - File upload handling
-- **bcryptjs** - Password hashing
+- Register / Login with JWT authentication
+- Email OTP verification before checkout (using Resend API)
+- Browse hotel rooms with filters by category
+- Book a room with check-in / check-out dates
+- Pay online via Razorpay or choose pay at hotel
+- View your booking history
+- Admin can add/delete rooms, upload images, and see all bookings with revenue stats
 
 ---
 
-## 📋 Prerequisites
+## Tech Stack
 
-Before running this project, make sure you have:
+**Frontend** — React, Vite, Tailwind CSS, React Router, Axios
 
-- **Node.js** (v14 or higher)
-- **npm** or **yarn**
-- **MongoDB** account (MongoDB Atlas recommended)
-- **Razorpay** account for payment processing (test credentials for development)
+**Backend** — Node.js, Express.js, MongoDB Atlas, Mongoose, JWT, Multer
+
+**Other** — Razorpay (payments), Resend (email OTP), Fast2SMS (SMS OTP), Vercel (frontend), Render (backend)
 
 ---
 
-## ⚙️ Installation & Setup
+## Why I chose these technologies
 
-### 1. Clone the Repository
+I used React because I wanted to learn component-based UI properly. For the backend I went with Express since it's straightforward and doesn't hide too much. MongoDB made sense for this project because booking and room data doesn't need strict relational structure. I chose Razorpay over Stripe because it supports Indian payments natively and has a good test mode.
+
+The hardest part was getting the Razorpay webhook flow right — the payment popup is non-blocking so you can't use a simple try/catch around `rzp.open()`. I had to handle success, failure, and dismiss separately.
+
+---
+
+## Running locally
+
+### 1. Clone the repo
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/cjhimanshu/hotel-booking-system
 cd hotel-booking-system
 ```
 
-### 2. Install Dependencies
+### 2. Install dependencies
 
 ```bash
-# Install server dependencies
-cd server
-npm install
-
-# Install client dependencies
-cd ../client
-npm install
+cd server && npm install
+cd ../client && npm install
 ```
 
-### 3. Environment Variables
+### 3. Set up environment variables
 
-Create `.env` files in both `server/` and `client/` directories:
+Create `server/.env` (copy from `server/.env.example`):
 
-#### Server (.env)
-
-```env
-# Database
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/hotel-booking
-
-# Authentication
-JWT_SECRET=your_jwt_secret_key_here
-
-# Payment Gateway
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_secret_key
-
-# Server Configuration
+```
 PORT=5000
-NODE_ENV=development
+MONGO_URI=<your_mongodb_atlas_connection_string>
+JWT_SECRET=<make_up_any_long_random_string>
+RAZORPAY_KEY_ID=<from_razorpay_dashboard>
+RAZORPAY_KEY_SECRET=<from_razorpay_dashboard>
+FRONTEND_URL=http://localhost:5173
+RESEND_API_KEY=<from_resend.com_dashboard>
+FAST2SMS_API_KEY=<from_fast2sms.com_dashboard>
 ```
 
-#### Client (.env)
+Create `client/.env`:
 
 ```env
-# API Configuration
 VITE_API_URL=http://localhost:5000/api
-
-# Razorpay (public key only)
-VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
 
-### 4. Configure MongoDB
+### 4. Start the app
 
-1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a new cluster
-3. Get your connection string and replace `<username>` and `<password>`
-4. Add your IP address to the whitelist (or allow access from anywhere for development)
+```bash
+# Terminal 1
+cd server && npm run dev
 
-### 5. Configure Razorpay
+# Terminal 2
+cd client && npm run dev
+```
 
-1. Sign up at [Razorpay](https://razorpay.com/)
-2. Get your test API keys from the dashboard
-3. Add keys to your `.env` files
-4. See [docs/razorpay-integration.md](docs/razorpay-integration.md) for detailed setup
+Frontend runs at http://localhost:5173, backend at http://localhost:5000
 
 ---
 
-## 🚀 Running the Application
+## Deployment
 
-### Development Mode
-
-Run both frontend and backend concurrently:
-
-```bash
-# Terminal 1 - Start backend server
-cd server
-npm run dev
-
-# Terminal 2 - Start frontend development server
-cd client
-npm run dev
-```
-
-The application will be available at:
-
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:5000
-
-### Production Build
-
-```bash
-# Build frontend for production
-cd client
-npm run build
-
-# Start backend in production mode
-cd ../server
-npm start
-```
+Frontend is on Vercel, backend is on Render. I initially tried deploying both on Vercel as a monorepo but ran into cold start issues with serverless functions, so split them. Render free tier does sleep after inactivity but wakes up in about 30–50 seconds on first request.
 
 ---
 
-## 📁 Project Structure
+## Project structure
 
 ```
 hotel-booking-system/
-├── client/                    # React frontend
-│   ├── public/               # Static assets
-│   ├── src/
-│   │   ├── assets/          # Images, fonts, etc.
-│   │   ├── components/      # Reusable React components
-│   │   │   ├── AdminRoute.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   └── ProtectedRoute.jsx
-│   │   ├── context/         # React Context API
-│   │   │   └── AuthContext.jsx
-│   │   ├── pages/           # Page components
-│   │   │   ├── AddRoom.jsx
-│   │   │   ├── AdminDashboard.jsx
-│   │   │   ├── Booking.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── MyBookings.jsx
-│   │   │   ├── Register.jsx
-│   │   │   └── Rooms.jsx
-│   │   ├── services/        # API service layer
-│   │   │   └── api.js
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
+├── client/               # React frontend
+│   └── src/
+│       ├── components/   # Navbar, ProtectedRoute, AdminRoute
+│       ├── context/      # AuthContext
+│       ├── pages/        # Rooms, Booking, Login, Register, AdminDashboard etc.
+│       └── services/     # Axios API config
 │
-├── server/                   # Node.js backend
-│   ├── controllers/         # Request handlers
-│   │   ├── authController.js
-│   │   ├── bookingController.js
-│   │   ├── paymentController.js
-│   │   └── roomController.js
-│   ├── middleware/          # Custom middleware
-│   │   ├── authMiddleware.js
-│   │   └── errorMiddleware.js
-│   ├── models/              # Mongoose schemas
-│   │   ├── Booking.js
-│   │   ├── Room.js
-│   │   └── User.js
-│   ├── routes/              # API routes
-│   │   ├── authRoutes.js
-│   │   ├── bookingRoutes.js
-│   │   ├── paymentRoutes.js
-│   │   └── roomRoutes.js
-│   ├── uploads/             # Uploaded room images
-│   ├── utils/               # Utility functions
-│   │   └── upload.js
-│   ├── server.js            # Entry point
-│   └── package.json
+├── server/               # Express backend
+│   ├── controllers/      # Auth, Booking, Payment, Room, Verification
+│   ├── middleware/       # JWT auth, error handler
+│   ├── models/           # User, Room, Booking schemas
+│   ├── routes/           # All API routes
+│   └── server.js
 │
-├── docs/                     # Documentation
-│   ├── deployment-guide.md
-│   ├── razorpay-integration.md
-│   └── vercel-setup.md
-│
-├── .gitignore
-├── vercel.json              # Vercel deployment config
-├── package.json             # Root package.json
-└── README.md
+└── docs/                 # Extra setup notes
 ```
 
 ---
 
-## 🌐 Deployment (Zero-Delay Free Tier)
+## About
 
-This application is configured to deploy as a **Full-Stack Vercel Monorepo**. This solves the "20 second delay" issue found on Render's free tier, as Vercel serverless functions wake up almost instantly.
+Built by **Himanshu Kumar**.
 
-### Quick Workflow:
+- GitHub: [github.com/cjhimanshu](https://github.com/cjhimanshu)
+- LinkedIn: [linkedin.com/in/himanshu-kumar-02ab40249](https://www.linkedin.com/in/himanshu-kumar-02ab40249)
 
-1. **Push to GitHub**: Make sure all your code is pushed to your GitHub repository.
-2. **Import to Vercel**: Go to your Vercel dashboard and click "Add New Project" -> Import your GitHub repository.
-3. **Configure Settings**:
-   - **Framework Preset**: Leave it as "Other"
-   - **Root Directory**: Leave it as the root (`./`)
-   - **Build Command**: `npm run vercel-build`
-   - **Output Directory**: `client/dist`
-4. **Environment Variables**: Add all variables from your `server/.env` file directly into the Vercel dashboard. *(You do not need to add the `VITE_API_URL`, Vercel handles the relative routing automatically).*
-5. **Deploy**: Click Deploy! Your React frontend and Express backend will now run on the exact same Vercel domain with zero long cold-starts.
-
----
-
-## 📸 Screenshots
-
-_(Add screenshots of your application here)_
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is open source and available under the [cj_ License]
-
----
-
-## 👤 Author
-
-**Your Name**
-
-- GitHub:[Himanshu kumar] https://github.com/cjhimanshu
-- LinkedIn: [Himanshu kumar] www.linkedin.com/in/himanshu-kumar-02ab40249
-
-
----
-
-## 🙏 Acknowledgments
-
-- [Razorpay](https://razorpay.com/) for payment processing
-- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) for database hosting
-- [Unsplash](https://unsplash.com/) for placeholder images
-
----
-
-**Made with ❤️ using the MERN Stack**
+Feel free to use this as reference for your own projects. If you find a bug or want to suggest something, open an issue.
