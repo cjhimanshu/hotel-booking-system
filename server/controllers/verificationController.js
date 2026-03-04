@@ -11,11 +11,12 @@ const generateOtp = () =>
 const getVerifiedContacts = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
-      "verifiedEmail verifiedPhone",
+      "email verifiedEmail verifiedPhone",
     );
     res.json({
       verifiedEmail: user.verifiedEmail || null,
       verifiedPhone: user.verifiedPhone || null,
+      accountEmail: user.email || null,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -34,6 +35,14 @@ const sendEmailOtp = async (req, res) => {
       return res.json({
         alreadyVerified: true,
         message: "Email already verified",
+      });
+    }
+    // Registered account email — auto-verify without OTP (user proved ownership at login)
+    if (user.email === email) {
+      await User.findByIdAndUpdate(userId, { verifiedEmail: email });
+      return res.json({
+        alreadyVerified: true,
+        message: "Account email auto-verified",
       });
     }
 
@@ -129,11 +138,9 @@ const sendPhoneOtp = async (req, res) => {
     const data = await response.json();
 
     if (!data.return) {
-      return res
-        .status(500)
-        .json({
-          message: "Failed to send SMS: " + (data.message || "Unknown error"),
-        });
+      return res.status(500).json({
+        message: "Failed to send SMS: " + (data.message || "Unknown error"),
+      });
     }
 
     res.json({ success: true, message: "OTP sent to your phone" });

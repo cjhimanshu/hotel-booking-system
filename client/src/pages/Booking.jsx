@@ -188,8 +188,13 @@ const Booking = () => {
       API.get("/verify/verified-contacts")
         .then((res) => {
           if (res.data.verifiedEmail) {
+            // Previously verified email — mark as verified immediately
             setGuestEmail(res.data.verifiedEmail);
             setEmailVerified(true);
+          } else if (res.data.accountEmail) {
+            // Pre-fill with registered account email — still requires Send OTP
+            // (which will auto-verify since it matches account email)
+            setGuestEmail(res.data.accountEmail);
           }
         })
         .catch(() => {});
@@ -239,7 +244,28 @@ const Booking = () => {
     }
   };
 
-  const prevStep = () => setStep(step - 1);
+  const prevStep = () => {
+    if (step === 1) {
+      navigate("/rooms");
+    } else {
+      setStep(step - 1);
+    }
+  };
+
+  // Handle browser back button to step through checkout instead of leaving
+  useEffect(() => {
+    window.history.pushState({ step }, "", window.location.href);
+    const handlePopState = () => {
+      if (step > 1) {
+        setStep((prev) => prev - 1);
+        window.history.pushState({ step: step - 1 }, "", window.location.href);
+      } else {
+        navigate("/rooms");
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [step]);
 
   if (!room)
     return (
@@ -305,7 +331,7 @@ const Booking = () => {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-white text-6xl">
-                ðŸ›ï¸
+                🛏️
               </div>
             )}
             <div className="absolute inset-0 flex items-center justify-center">
@@ -313,7 +339,7 @@ const Booking = () => {
                 <h1 className="text-4xl font-bold mb-2">
                   {room.name || room.type}
                 </h1>
-                <p className="text-xl">â‚¹{room.price} per night</p>
+                <p className="text-xl">₹{room.price} per night</p>
               </div>
             </div>
           </div>
@@ -380,7 +406,7 @@ const Booking = () => {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-gray-700">Price per night:</span>
                       <span className="font-semibold text-gray-900">
-                        â‚¹{room.price}
+                        ₹{room.price}
                       </span>
                     </div>
                     <div className="border-t-2 border-amber-300 pt-2 mt-2">
@@ -389,18 +415,26 @@ const Booking = () => {
                           Total:
                         </span>
                         <span className="text-2xl font-bold text-amber-600">
-                          â‚¹{totalPrice}
+                          ₹{totalPrice}
                         </span>
                       </div>
                     </div>
                   </div>
                 )}
-                <button
-                  onClick={nextStep}
-                  className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 rounded-lg hover:from-amber-700 hover:to-orange-700 font-semibold text-lg transition-all shadow-lg"
-                >
-                  Continue to Guest Details
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={prevStep}
+                    className="w-1/3 bg-gray-200 text-gray-700 px-6 py-4 rounded-lg hover:bg-gray-300 font-semibold transition-all"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={nextStep}
+                    className="w-2/3 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 rounded-lg hover:from-amber-700 hover:to-orange-700 font-semibold text-lg transition-all shadow-lg"
+                  >
+                    Continue to Guest Details
+                  </button>
+                </div>
               </div>
             )}
 
@@ -431,9 +465,7 @@ const Booking = () => {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Email Address *
                       {emailVerified && (
-                        <span className="ml-2 text-green-600">
-                          âœ“ Verified
-                        </span>
+                        <span className="ml-2 text-green-600">✓ Verified</span>
                       )}
                     </label>
                     <div className="flex gap-2">
@@ -569,7 +601,7 @@ const Booking = () => {
                         Credit/Debit Card, UPI, Net Banking, Wallet
                       </p>
                     </div>
-                    <span className="text-2xl">ðŸ’³</span>
+                    <span className="text-2xl">💳</span>
                   </label>
                   <label className="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-amber-500 transition-all">
                     <input
@@ -587,7 +619,7 @@ const Booking = () => {
                         Pay cash when you arrive
                       </p>
                     </div>
-                    <span className="text-2xl">ðŸ’µ</span>
+                    <span className="text-2xl">💵</span>
                   </label>
                 </div>
                 <div className="flex gap-4">
@@ -684,7 +716,7 @@ const Booking = () => {
                         Total Amount
                       </span>
                       <span className="text-3xl font-bold text-amber-600">
-                        â‚¹{totalPrice}
+                        ₹{totalPrice}
                       </span>
                     </div>
                   </div>
@@ -700,7 +732,7 @@ const Booking = () => {
                     onClick={handleBooking}
                     className="w-2/3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-lg hover:from-green-700 hover:to-emerald-700 font-semibold text-lg transition-all shadow-lg"
                   >
-                    Confirm & Pay â‚¹{totalPrice}
+                    Confirm & Pay ₹{totalPrice}
                   </button>
                 </div>
               </div>
