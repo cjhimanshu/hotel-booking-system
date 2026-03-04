@@ -1,6 +1,6 @@
 # Hotel Booking System
 
-  Hotel booking web app built using the MERN stack. I built it to learn how real-world booking systems work, from user login and room management to actual payment processing with Razorpay.
+Hotel booking web app built using the MERN stack. I built it to learn how real-world booking systems work, from user login and room management to actual payment processing with Razorpay.
 
 The app is fully deployed and working. You can create an account, browse rooms, book one with real payment (test mode), and also manage everything from an admin panel.
 
