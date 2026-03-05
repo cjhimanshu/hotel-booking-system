@@ -2,9 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { Resend } = require("resend");
-
-const getResend = () => new Resend(process.env.RESEND_API_KEY);
+const sendEmail = require("../utils/sendEmail");
 
 exports.register = async (req, res) => {
   try {
@@ -89,9 +87,7 @@ exports.forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password/${rawToken}`;
 
-    const resend = getResend();
-    await resend.emails.send({
-      from: "Luxury Stay <onboarding@resend.dev>",
+    await sendEmail({
       to: user.email,
       subject: "Password Reset Request – Luxury Stay",
       html: `

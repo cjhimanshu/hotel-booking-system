@@ -18,17 +18,6 @@ const Booking = () => {
   const [guestEmail, setGuestEmail] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
 
-  // Validation errors
-  const [emailError, setEmailError] = useState("");
-
-  // OTP verification states (email only)
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [emailOtpSent, setEmailOtpSent] = useState(false);
-  const [emailOtpInput, setEmailOtpInput] = useState("");
-  const [emailSending, setEmailSending] = useState(false);
-  const [emailVerifying, setEmailVerifying] = useState(false);
-  const [emailOtpError, setEmailOtpError] = useState("");
-
   // Step 3: Payment
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -198,85 +187,24 @@ const Booking = () => {
         alert("Please fill in all guest details");
         return;
       }
-      if (!emailVerified) {
-        alert("Please verify your email address with OTP");
-        return;
-      }
-      setEmailError("");
     }
     setStep(step + 1);
   };
 
-  const handleEmailChange = (e) => {
-    setGuestEmail(e.target.value);
-    setEmailError("");
-    setEmailVerified(false);
-    setEmailOtpSent(false);
-    setEmailOtpInput("");
-    setEmailOtpError("");
-  };
-
-  // Auto-load verified email when reaching step 2
+  // Auto-fill email from account when reaching step 2
   useEffect(() => {
     if (step === 2) {
       API.get("/verify/verified-contacts")
         .then((res) => {
           if (res.data.verifiedEmail) {
-            // Previously verified email — mark as verified immediately
             setGuestEmail(res.data.verifiedEmail);
-            setEmailVerified(true);
           } else if (res.data.accountEmail) {
-            // Pre-fill with registered account email — still requires Send OTP
-            // (which will auto-verify since it matches account email)
             setGuestEmail(res.data.accountEmail);
           }
         })
         .catch(() => {});
     }
   }, [step]);
-
-  const handleSendEmailOtp = async () => {
-    if (!guestEmail) return;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(guestEmail)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
-    setEmailSending(true);
-    setEmailOtpError("");
-    try {
-      const res = await API.post("/verify/send-email-otp", {
-        email: guestEmail,
-      });
-      if (res.data.alreadyVerified) {
-        setEmailVerified(true);
-      } else {
-        setEmailOtpSent(true);
-      }
-    } catch (err) {
-      setEmailOtpError(err.response?.data?.message || "Failed to send OTP");
-    } finally {
-      setEmailSending(false);
-    }
-  };
-
-  const handleVerifyEmailOtp = async () => {
-    if (!emailOtpInput) return;
-    setEmailVerifying(true);
-    setEmailOtpError("");
-    try {
-      await API.post("/verify/verify-email-otp", {
-        email: guestEmail,
-        otp: emailOtpInput,
-      });
-      setEmailVerified(true);
-      setEmailOtpSent(false);
-    } catch (err) {
-      setEmailOtpError(err.response?.data?.message || "Invalid OTP");
-    } finally {
-      setEmailVerifying(false);
-    }
-  };
 
   const prevStep = () => {
     if (step === 1) {
@@ -494,90 +422,19 @@ const Booking = () => {
                     />
                   </div>
 
-                  {/* Email with OTP */}
+                  {/* Email */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Email Address *
-                      {emailVerified && (
-                        <span className="ml-2 text-green-600">✓ Verified</span>
-                      )}
                     </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="email"
-                        value={guestEmail}
-                        onChange={handleEmailChange}
-                        placeholder="john@example.com"
-                        disabled={emailVerified}
-                        className={`flex-1 border-2 px-4 py-3 rounded-lg focus:outline-none ${
-                          emailVerified
-                            ? "border-green-500 bg-green-50 text-green-800"
-                            : emailError
-                              ? "border-red-500 focus:border-red-500"
-                              : "border-gray-300 focus:border-amber-500"
-                        }`}
-                        required
-                      />
-                      {!emailVerified && (
-                        <button
-                          type="button"
-                          onClick={handleSendEmailOtp}
-                          disabled={emailSending || !guestEmail}
-                          className="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                        >
-                          {emailSending
-                            ? "Sending..."
-                            : emailOtpSent
-                              ? "Resend"
-                              : "Send OTP"}
-                        </button>
-                      )}
-                      {emailVerified && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEmailVerified(false);
-                            setEmailOtpSent(false);
-                            setEmailOtpInput("");
-                          }}
-                          className="px-4 py-3 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 text-sm font-semibold"
-                        >
-                          Change
-                        </button>
-                      )}
-                    </div>
-                    {emailError && (
-                      <p className="mt-1 text-sm text-red-600 font-semibold">
-                        {emailError}
-                      </p>
-                    )}
-                    {emailOtpSent && !emailVerified && (
-                      <div className="mt-2 flex gap-2">
-                        <input
-                          type="text"
-                          value={emailOtpInput}
-                          onChange={(e) => setEmailOtpInput(e.target.value)}
-                          placeholder="Enter 6-digit OTP"
-                          maxLength={6}
-                          className="flex-1 border-2 border-amber-400 px-4 py-2 rounded-lg focus:border-amber-600 focus:outline-none tracking-widest text-center text-lg font-bold"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleVerifyEmailOtp}
-                          disabled={
-                            emailVerifying || emailOtpInput.length !== 6
-                          }
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-sm disabled:opacity-50"
-                        >
-                          {emailVerifying ? "Verifying..." : "Verify"}
-                        </button>
-                      </div>
-                    )}
-                    {emailOtpError && (
-                      <p className="mt-1 text-sm text-red-600 font-semibold">
-                        {emailOtpError}
-                      </p>
-                    )}
+                    <input
+                      type="email"
+                      value={guestEmail}
+                      onChange={(e) => setGuestEmail(e.target.value)}
+                      placeholder="john@example.com"
+                      className="w-full border-2 border-gray-300 px-4 py-3 rounded-lg focus:border-amber-500 focus:outline-none"
+                      required
+                    />
                   </div>
 
                   {/* Special Requests */}
@@ -603,7 +460,7 @@ const Booking = () => {
                   </button>
                   <button
                     onClick={nextStep}
-                    disabled={!emailVerified || !guestName}
+                    disabled={!guestName || !guestEmail}
                     className="w-2/3 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 rounded-lg hover:from-amber-700 hover:to-orange-700 font-semibold text-lg transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Continue to Payment

@@ -1,7 +1,5 @@
 const User = require("../models/User");
-const { Resend } = require("resend");
-
-const getResend = () => new Resend(process.env.RESEND_API_KEY);
+const sendEmail = require("../utils/sendEmail");
 
 // Generate 6-digit OTP
 const generateOtp = () =>
@@ -53,9 +51,7 @@ const sendEmailOtp = async (req, res) => {
       emailOtpExpiry: expiry,
     });
 
-    const resend = getResend();
-    await resend.emails.send({
-      from: "Luxury Stay <onboarding@resend.dev>",
+    await sendEmail({
       to: email,
       subject: "Your Email Verification OTP",
       html: `
