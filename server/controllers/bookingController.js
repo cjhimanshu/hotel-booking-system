@@ -13,25 +13,17 @@ exports.createBooking = async (req, res) => {
       totalPrice,
     } = req.body;
 
-    const conflict = await Booking.findOne({
-      room,
-      checkIn: { $lt: checkOut },
-      checkOut: { $gt: checkIn },
-      status: { $ne: "cancelled" },
-    });
-
-    if (conflict)
-      return res.status(400).json({ message: "Room not available" });
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
 
     const roomData = await Room.findById(room);
-    const days =
-      (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
+    const days = (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
 
     const booking = await Booking.create({
       user: req.user.id,
       room,
-      checkIn,
-      checkOut,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
       numberOfGuests: numberOfGuests || 1,
       totalPrice: totalPrice || days * roomData.price,
       paymentMethod: paymentMethod || "credit_card",
@@ -60,7 +52,7 @@ exports.cancelBooking = async (req, res) => {
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { status: "cancelled" },
-      { new: true }
+      { new: true },
     );
     res.json(booking);
   } catch (error) {

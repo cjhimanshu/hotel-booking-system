@@ -110,13 +110,23 @@ const Booking = () => {
                 navigate("/my-bookings");
               }
             } catch (error) {
-              console.error("Payment verification error:", error);
-              alert(
-                "Payment verification failed: " +
-                  (error.response?.data?.message || error.message) +
-                  "\nPlease contact support with your payment ID: " +
-                  response.razorpay_payment_id,
-              );
+              console.error("Booking creation error:", error);
+              const msg = error.response?.data?.message || error.message;
+              if (msg === "Room not available") {
+                alert(
+                  "This room is already booked for the selected dates.\n\nYour payment (ID: " +
+                    response.razorpay_payment_id +
+                    ") will be refunded within 5-7 business days.\nPlease contact support if needed.",
+                );
+              } else {
+                alert(
+                  "Booking failed: " +
+                    msg +
+                    "\nYour payment ID: " +
+                    response.razorpay_payment_id +
+                    "\nPlease contact support.",
+                );
+              }
               setIsProcessing(false);
             }
           },
