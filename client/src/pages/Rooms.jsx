@@ -100,7 +100,7 @@ const Rooms = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative bg-gray-900 text-white h-[75vh] overflow-hidden">
+      <div className="relative bg-gray-900 text-white min-h-[60vh] sm:h-[75vh] overflow-hidden">
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -122,17 +122,17 @@ const Rooms = () => {
               <p className="text-amber-400 text-sm uppercase tracking-[0.3em] mb-4 font-medium">
                 Welcome to
               </p>
-              <h1 className="font-display text-6xl md:text-8xl font-light mb-6 tracking-wide leading-tight">
+              <h1 className="font-display text-4xl sm:text-6xl md:text-8xl font-light mb-6 tracking-wide leading-tight">
                 LUXURY STAY
               </h1>
               <div className="w-32 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mb-8"></div>
-              <p className="text-xl md:text-2xl mb-12 font-light tracking-wider text-gray-200 max-w-3xl mx-auto">
+              <p className="text-base sm:text-xl md:text-2xl mb-8 sm:mb-12 font-light tracking-wider text-gray-200 max-w-3xl mx-auto">
                 EXPERIENCE COMFORT AND ELEGANCE IN EVERY ROOM
               </p>
               <div className="flex justify-center gap-6 flex-wrap">
                 <a
                   href="#rooms"
-                  className="group bg-gradient-to-r from-amber-500 to-amber-600 text-white px-10 py-4 rounded-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all duration-300 uppercase tracking-widest text-sm shadow-2xl hover:shadow-amber-500/50 hover:scale-105"
+                  className="group bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 sm:px-10 py-3 sm:py-4 rounded-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all duration-300 uppercase tracking-widest text-sm shadow-2xl hover:shadow-amber-500/50 hover:scale-105"
                 >
                   <span className="flex items-center gap-2">
                     Book Now
@@ -153,7 +153,7 @@ const Rooms = () => {
                 </a>
                 <a
                   href="#about"
-                  className="group border-2 border-white/80 text-white px-10 py-4 rounded-sm font-medium hover:bg-white hover:text-gray-900 transition-all duration-300 uppercase tracking-widest text-sm backdrop-blur-sm hover:scale-105"
+                  className="group border-2 border-white/80 text-white px-6 sm:px-10 py-3 sm:py-4 rounded-sm font-medium hover:bg-white hover:text-gray-900 transition-all duration-300 uppercase tracking-widest text-sm backdrop-blur-sm hover:scale-105"
                 >
                   Learn More
                 </a>
@@ -168,7 +168,7 @@ const Rooms = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <div className="text-center mb-16">
-            <h2 className="font-display text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="font-display text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
               Discover Excellence
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mx-auto mb-6"></div>
@@ -319,12 +319,12 @@ const Rooms = () => {
               <img
                 src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80"
                 alt="Luxury Hotel"
-                className="relative rounded-2xl shadow-2xl w-full h-[500px] object-cover"
+                className="relative rounded-2xl shadow-2xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
               />
-              <div className="absolute -bottom-6 -right-6 bg-white p-8 rounded-xl shadow-xl">
+              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-white p-4 sm:p-8 rounded-xl shadow-xl">
                 <div className="text-center">
-                  <div className="text-5xl font-bold text-amber-600">15+</div>
-                  <div className="text-gray-600 font-medium mt-2">
+                  <div className="text-3xl sm:text-5xl font-bold text-amber-600">15+</div>
+                  <div className="text-gray-600 font-medium text-sm sm:text-base mt-1 sm:mt-2">
                     Years of Excellence
                   </div>
                 </div>
@@ -336,7 +336,7 @@ const Rooms = () => {
               <p className="text-amber-600 text-sm uppercase tracking-[0.3em] mb-4 font-medium">
                 About Us
               </p>
-              <h2 className="font-display text-5xl font-bold text-gray-900 mb-6">
+              <h2 className="font-display text-3xl sm:text-5xl font-bold text-gray-900 mb-6">
                 Where Luxury Meets Comfort
               </h2>
               <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mb-8"></div>
@@ -431,7 +431,7 @@ const Rooms = () => {
       <div id="rooms" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="font-display text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="font-display text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
               Explore Our Rooms
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mx-auto"></div>

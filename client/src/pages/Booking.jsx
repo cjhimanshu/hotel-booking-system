@@ -247,38 +247,38 @@ const Booking = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 pt-28 pb-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 pt-20 sm:pt-28 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span
-              className={`text-sm font-semibold ${
+              className={`text-xs sm:text-sm font-semibold ${
                 step >= 1 ? "text-amber-600" : "text-gray-400"
               }`}
             >
-              Dates & Guests
+              Dates
             </span>
             <span
-              className={`text-sm font-semibold ${
+              className={`text-xs sm:text-sm font-semibold ${
                 step >= 2 ? "text-amber-600" : "text-gray-400"
               }`}
             >
-              Guest Details
+              Details
             </span>
             <span
-              className={`text-sm font-semibold ${
+              className={`text-xs sm:text-sm font-semibold ${
                 step >= 3 ? "text-amber-600" : "text-gray-400"
               }`}
             >
               Payment
             </span>
             <span
-              className={`text-sm font-semibold ${
+              className={`text-xs sm:text-sm font-semibold ${
                 step >= 4 ? "text-amber-600" : "text-gray-400"
               }`}
             >
-              Confirmation
+              Confirm
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -307,16 +307,16 @@ const Booking = () => {
               </div>
             )}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white">
-                <h1 className="text-4xl font-bold mb-2">
+              <div className="text-center text-white px-4">
+                <h1 className="text-2xl sm:text-4xl font-bold mb-2">
                   {room.name || room.type}
                 </h1>
-                <p className="text-xl">₹{room.price} per night</p>
+                <p className="text-base sm:text-xl">₹{room.price} per night</p>
               </div>
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             {/* Step 1: Dates & Guests */}
             {step === 1 && (
               <div className="space-y-6">

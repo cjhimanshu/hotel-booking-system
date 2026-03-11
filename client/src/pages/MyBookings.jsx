@@ -59,9 +59,9 @@ const MyBookings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 pt-28 pb-6 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 pt-20 sm:pt-28 pb-6 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-gray-800">My Bookings</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold mb-8 text-gray-800">My Bookings</h1>
 
         {loading && (
           <div className="bg-white p-12 rounded-lg shadow-lg text-center">
@@ -96,17 +96,17 @@ const MyBookings = () => {
                   key={booking._id}
                   className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                 >
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-800">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-800">
                         {booking.room?.name || booking.room?.type}
                       </h3>
                       <p className="text-gray-600">
                         {booking.room?.description}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-amber-600">
+                    <div className="text-left sm:text-right flex-shrink-0">
+                      <div className="text-2xl sm:text-3xl font-bold text-amber-600">
                         ₹{booking.totalPrice}
                       </div>
                       <p className="text-sm text-gray-500">Total Amount</p>
