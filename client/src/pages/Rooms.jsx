@@ -100,7 +100,7 @@ const Rooms = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative bg-gray-900 text-white min-h-[60vh] sm:h-[75vh] overflow-hidden">
+      <div className="relative bg-gray-900 text-white min-h-[60vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -116,7 +116,7 @@ const Rooms = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
 
         {/* Content */}
-        <div className="relative h-full flex items-center justify-center px-4">
+        <div className="relative w-full flex justify-center px-4 py-16 sm:py-0">
           <div className="max-w-5xl mx-auto text-center">
             <div className="animate-fade-in-up">
               <p className="text-amber-400 text-sm uppercase tracking-[0.3em] mb-4 font-medium">
@@ -164,11 +164,11 @@ const Rooms = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-24 bg-gradient-to-b from-white to-gray-50">
+      <div className="py-10 md:py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 sm:mb-16">
+            <h2 className="font-display text-2xl sm:text-5xl font-bold text-gray-900 mb-4">
               Discover Excellence
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mx-auto mb-6"></div>
@@ -178,7 +178,7 @@ const Rooms = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
             {/* Luxury Rooms Card */}
             <div className="animate-fade-in-up animation-delay-100 group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:-translate-y-2">
               <div className="h-64 overflow-hidden relative">
@@ -194,8 +194,8 @@ const Rooms = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-8">
-                <h3 className="font-display text-3xl font-semibold mb-4 text-gray-900">
+              <div className="p-4 sm:p-8">
+                <h3 className="font-display text-xl sm:text-3xl font-semibold mb-3 sm:mb-4 text-gray-900">
                   Luxury Rooms
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
@@ -236,8 +236,8 @@ const Rooms = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-8">
-                <h3 className="font-display text-3xl font-semibold mb-4 text-gray-900">
+              <div className="p-4 sm:p-8">
+                <h3 className="font-display text-xl sm:text-3xl font-semibold mb-3 sm:mb-4 text-gray-900">
                   Fine Dining
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
@@ -279,8 +279,8 @@ const Rooms = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-8">
-                <h3 className="font-display text-3xl font-semibold mb-4 text-gray-900">
+              <div className="p-4 sm:p-8">
+                <h3 className="font-display text-xl sm:text-3xl font-semibold mb-3 sm:mb-4 text-gray-900">
                   Premium Facilities
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
@@ -310,11 +310,14 @@ const Rooms = () => {
       </div>
 
       {/* About Section */}
-      <div id="about" className="py-24 bg-gradient-to-b from-gray-50 to-white">
+      <div
+        id="about"
+        className="py-10 md:py-24 bg-gradient-to-b from-gray-50 to-white"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
             {/* Left Side - Image */}
-            <div className="animate-slide-in-left relative">
+            <div className="animate-slide-in-left relative pb-8 sm:pb-0">
               <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 to-amber-600/20 rounded-2xl transform rotate-3"></div>
               <img
                 src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80"
@@ -338,19 +341,19 @@ const Rooms = () => {
               <p className="text-amber-600 text-sm uppercase tracking-[0.3em] mb-4 font-medium">
                 About Us
               </p>
-              <h2 className="font-display text-3xl sm:text-5xl font-bold text-gray-900 mb-6">
+              <h2 className="font-display text-2xl sm:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                 Where Luxury Meets Comfort
               </h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mb-8"></div>
+              <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mb-4 sm:mb-8"></div>
 
-              <p className="text-gray-600 text-lg leading-relaxed mb-6">
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6">
                 Welcome to Luxury Stay, where exceptional hospitality and
                 elegant accommodations combine to create an unforgettable
                 experience. For over 15 years, we've been dedicated to providing
                 our guests with world-class service and premium amenities.
               </p>
 
-              <p className="text-gray-600 text-lg leading-relaxed mb-8">
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8">
                 Each of our meticulously designed rooms offers a sanctuary of
                 comfort, featuring modern amenities, breathtaking views, and
                 attention to every detail. Whether you're traveling for business
@@ -358,7 +361,7 @@ const Rooms = () => {
                 exceeds expectations.
               </p>
 
-              <div className="grid grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 mb-6 sm:mb-8">
                 <div className="flex items-start gap-3">
                   <div className="text-3xl">🏆</div>
                   <div>
@@ -407,7 +410,7 @@ const Rooms = () => {
 
               <a
                 href="#rooms"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all duration-300 uppercase tracking-widest text-sm shadow-lg hover:shadow-amber-500/50 hover:scale-105"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all duration-300 uppercase tracking-widest text-sm shadow-lg hover:shadow-amber-500/50 hover:scale-105"
               >
                 Explore Rooms
                 <svg
@@ -430,10 +433,10 @@ const Rooms = () => {
       </div>
 
       {/* Room Categories Filter */}
-      <div id="rooms" className="py-16 bg-white">
+      <div id="rooms" className="py-8 sm:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8">
+            <h2 className="font-display text-2xl sm:text-5xl font-bold text-gray-900 mb-4">
               Explore Our Rooms
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-amber-600 mx-auto"></div>
@@ -443,7 +446,7 @@ const Rooms = () => {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`px-8 py-3 rounded-lg font-medium transition-all duration-300 text-sm uppercase tracking-wider ${
+                className={`px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-medium transition-all duration-300 text-xs sm:text-sm uppercase tracking-wider ${
                   selectedCategory === category.id
                     ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-200 scale-105"
                     : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-amber-300"
@@ -458,7 +461,7 @@ const Rooms = () => {
       </div>
 
       {/* Rooms Section */}
-      <div className="py-16">
+      <div className="py-6 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 text-center">
             <p className="text-lg text-gray-600">
@@ -519,8 +522,8 @@ const Rooms = () => {
                         </div>
                       )}
                     </div>
-                    <div className="p-6">
-                      <h3 className="text-2xl font-bold mb-2 text-gray-800">
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-lg sm:text-2xl font-bold mb-2 text-gray-800">
                         {room.type}
                       </h3>
                       <p className="text-gray-600 mb-1">
@@ -545,7 +548,7 @@ const Rooms = () => {
 
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <span className="text-3xl font-bold text-blue-600">
+                          <span className="text-2xl sm:text-3xl font-bold text-blue-600">
                             ₹{room.price.toLocaleString()}
                           </span>
                           <span className="text-gray-500"> /night</span>
