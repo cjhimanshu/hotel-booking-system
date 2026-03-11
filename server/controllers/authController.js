@@ -85,12 +85,19 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password/${rawToken}`;
+    const resetUrl = `${
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    }/reset-password/${rawToken}`;
 
-    await sendEmail({
-      to: user.email,
-      subject: "Password Reset Request – Luxury Stay",
-      html: `
+    // Always log to server console for development/debugging
+    console.log("\n🔑 Password reset requested for:", user.email);
+    console.log("🔗 Reset URL (valid 1 hour):", resetUrl, "\n");
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Password Reset Request – Luxury Stay",
+        html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
           <h2 style="color:#1d4ed8;">🏨 Luxury Stay – Password Reset</h2>
           <p>Hi <strong>${user.name}</strong>,</p>
@@ -101,15 +108,32 @@ exports.forgotPassword = async (req, res) => {
               Reset Password
             </a>
           </div>
+          <p style="color:#6b7280;font-size:14px;">Or copy this link: <a href="${resetUrl}">${resetUrl}</a></p>
           <p style="color:#6b7280;font-size:14px;">This link expires in <strong>1 hour</strong>.</p>
           <p style="color:#6b7280;font-size:14px;">If you didn't request this, you can safely ignore this email.</p>
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
           <p style="color:#9ca3af;font-size:12px;">Luxury Stay Hotel Booking System</p>
         </div>
       `,
-    });
-
-    res.json({ message: "If that email exists, a reset link has been sent." });
+      });
+      return res.json({
+        message: "If that email exists, a reset link has been sent.",
+      });
+    } catch (emailError) {
+      if (emailError.message === "EMAIL_NOT_CONFIGURED") {
+        // Token is saved — dev can use the console URL to test the flow
+        return res.status(503).json({
+          message:
+            "Email service is not configured. Please set EMAIL_USER and EMAIL_PASS in server/.env (Gmail App Password required). Check the server console for the reset link.",
+        });
+      }
+      // Real SMTP / auth error
+      console.error("SMTP send error:", emailError.message);
+      return res.status(500).json({
+        message:
+          "Failed to send reset email. Please verify your EMAIL_USER and EMAIL_PASS (must be a Gmail App Password). Check server logs for details.",
+      });
+    }
   } catch (error) {
     console.error("Forgot password error:", error);
     res

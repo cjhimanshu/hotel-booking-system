@@ -291,7 +291,7 @@ const Booking = () => {
 
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Room Header */}
-          <div className="relative h-64 bg-gradient-to-r from-amber-600 to-orange-600">
+          <div className="relative h-40 sm:h-64 bg-gradient-to-r from-amber-600 to-orange-600">
             {room.images && room.images.length > 0 ? (
               <img
                 src={room.images[0]}

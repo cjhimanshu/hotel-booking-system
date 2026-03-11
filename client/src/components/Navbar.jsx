@@ -78,15 +78,9 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className={`hover:text-amber-300 font-medium transition uppercase tracking-widest text-sm ${textClasses}`}
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
                   className="bg-amber-600 text-white px-6 py-2 rounded-sm hover:bg-amber-700 transition font-medium shadow-lg uppercase tracking-wider text-sm"
                 >
-                  Register
+                  Login
                 </Link>
               </>
             ) : (
@@ -191,16 +185,9 @@ const Navbar = () => {
                     <Link
                       to="/login"
                       onClick={closeMenu}
-                      className="text-center text-white hover:text-amber-300 font-medium uppercase tracking-widest text-sm transition py-2"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/register"
-                      onClick={closeMenu}
                       className="text-center bg-amber-600 text-white px-6 py-3 rounded-sm hover:bg-amber-700 transition font-medium shadow-lg uppercase tracking-wider text-sm"
                     >
-                      Register
+                      Login
                     </Link>
                   </div>
                 ) : (
