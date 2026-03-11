@@ -323,7 +323,9 @@ const Rooms = () => {
               />
               <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-white p-4 sm:p-8 rounded-xl shadow-xl">
                 <div className="text-center">
-                  <div className="text-3xl sm:text-5xl font-bold text-amber-600">15+</div>
+                  <div className="text-3xl sm:text-5xl font-bold text-amber-600">
+                    15+
+                  </div>
                   <div className="text-gray-600 font-medium text-sm sm:text-base mt-1 sm:mt-2">
                     Years of Excellence
                   </div>
