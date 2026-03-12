@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Rooms from "./pages/Rooms";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Booking from "./pages/Booking";
 import MyBookings from "./pages/MyBookings";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Rooms />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 

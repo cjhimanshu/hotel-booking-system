@@ -77,6 +77,12 @@ const Navbar = () => {
             {!user ? (
               <>
                 <Link
+                  to="/register"
+                  className="border border-amber-400 text-amber-300 px-6 py-2 rounded-sm hover:bg-amber-400 hover:text-white transition font-medium shadow-lg uppercase tracking-wider text-sm"
+                >
+                  Register
+                </Link>
+                <Link
                   to="/login"
                   className="bg-amber-600 text-white px-6 py-2 rounded-sm hover:bg-amber-700 transition font-medium shadow-lg uppercase tracking-wider text-sm"
                 >
@@ -182,6 +188,13 @@ const Navbar = () => {
               <div className="pt-2 px-4">
                 {!user ? (
                   <div className="flex flex-col gap-2">
+                    <Link
+                      to="/register"
+                      onClick={closeMenu}
+                      className="text-center border border-amber-400 text-amber-300 px-6 py-3 rounded-sm hover:bg-amber-400 hover:text-white transition font-medium shadow-lg uppercase tracking-wider text-sm"
+                    >
+                      Register
+                    </Link>
                     <Link
                       to="/login"
                       onClick={closeMenu}
