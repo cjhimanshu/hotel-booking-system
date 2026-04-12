@@ -14,7 +14,8 @@ if (!fs.existsSync(uploadsDir)) {
 
 const app = express();
 
-// CORS Configuration
+// CORS Configuration: Allows specific frontend domains (Vercel, localhost)
+// to make requests to this backend API, and allows all methods.
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
@@ -53,6 +54,11 @@ app.get("/", (req, res) => {
   res.json({ message: "Hotel Booking API is running" });
 });
 
+/**
+ * Health check endpoint.
+ * This is primarily used by platforms like Render to ping the backend
+ * and prevent it from sleeping (or to check if it's awake).
+ */
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
