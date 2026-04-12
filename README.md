@@ -40,6 +40,12 @@ The hardest part was getting the Razorpay webhook flow right — the payment pop
 
 ## Running locally
 
+### Prerequisites
+
+Make sure you have the following installed on your machine:
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- [Git](https://git-scm.com/)
+
 ### 1. Clone the repo
 
 ```bash
