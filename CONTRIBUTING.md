@@ -15,6 +15,7 @@ Thank you for your interest in contributing to this project. Please follow these
 ### Development Setup
 
 1. Install dependencies:
+
    ```bash
    cd server && npm install
    cd ../client && npm install
@@ -23,6 +24,7 @@ Thank you for your interest in contributing to this project. Please follow these
 2. Set up environment variables as described in README.md
 
 3. Start development servers:
+
    ```bash
    # Terminal 1 - Backend
    cd server && npm run dev
@@ -54,6 +56,7 @@ Thank you for your interest in contributing to this project. Please follow these
 ### Reporting Issues
 
 When reporting bugs, please include:
+
 - Steps to reproduce
 - Expected behavior
 - Actual behavior

@@ -36,6 +36,7 @@
 ## Component Architecture
 
 ### Frontend
+
 ```
 src/
 ├── components/        # Reusable UI components
@@ -46,6 +47,7 @@ src/
 ```
 
 ### Backend
+
 ```
 server/
 ├── controllers/      # Business logic
@@ -59,6 +61,7 @@ server/
 ## Data Models
 
 ### User
+
 - Email (unique, indexed)
 - Password (hashed)
 - Name, Phone
@@ -66,12 +69,14 @@ server/
 - Email verified flag
 
 ### Room
+
 - Name, Price, Category
 - Description, Image
 - Capacity, Amenities
 - Availability
 
 ### Booking
+
 - User ID, Room ID
 - Check-in, Check-out dates
 - Total price, Payment status

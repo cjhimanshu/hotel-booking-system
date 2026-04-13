@@ -5,12 +5,14 @@
 ### First Time Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/cjhimanshu/hotel-booking-system
    cd hotel-booking-system
    ```
 
 2. **Install dependencies**
+
    ```bash
    # Install root dependencies (if any)
    npm install
@@ -25,6 +27,7 @@
    ```
 
 3. **Configure environment variables**
+
    ```bash
    # Copy example env files
    cp server/.env.example server/.env
@@ -32,6 +35,7 @@
    ```
 
 4. **Start development servers**
+
    ```bash
    # Terminal 1 - Backend
    cd server
@@ -58,10 +62,12 @@
 ## Common Commands
 
 ### Backend
+
 - `npm run dev` - Start development server with hot reload
 - `npm start` - Start production server
 
 ### Frontend
+
 - `npm run dev` - Start Vite dev server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build

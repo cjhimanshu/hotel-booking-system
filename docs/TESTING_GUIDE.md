@@ -5,11 +5,13 @@
 ### Unit Testing Setup
 
 1. Install Jest:
+
 ```bash
 npm install --save-dev jest @types/jest
 ```
 
 2. Create `jest.config.js`:
+
 ```javascript
 module.exports = {
   testEnvironment: 'node',
@@ -72,12 +74,10 @@ const app = require('../server');
 
 describe('Auth API', () => {
   test('POST /api/auth/login returns token', async () => {
-    const response = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'test@example.com',
-        password: 'password123',
-      });
+    const response = await request(app).post('/api/auth/login').send({
+      email: 'test@example.com',
+      password: 'password123',
+    });
 
     expect(response.status).toBe(200);
     expect(response.body.token).toBeDefined();
@@ -88,6 +88,7 @@ describe('Auth API', () => {
 ## Test Coverage
 
 Run coverage report:
+
 ```bash
 npm test -- --coverage
 ```

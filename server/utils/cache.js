@@ -4,12 +4,12 @@ const cache = new Map();
 const getFromCache = (key) => {
   const item = cache.get(key);
   if (!item) return null;
-  
+
   if (item.expireAt && item.expireAt < Date.now()) {
     cache.delete(key);
     return null;
   }
-  
+
   return item.value;
 };
 
@@ -25,7 +25,7 @@ const clearCache = (pattern = null) => {
     cache.clear();
     return;
   }
-  
+
   for (const key of cache.keys()) {
     if (key.match(pattern)) {
       cache.delete(key);
