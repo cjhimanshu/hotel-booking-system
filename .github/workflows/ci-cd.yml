@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:latest
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: |
+          cd server
+          npm install
+          cd ../client
+          npm install
+      
+      - name: Run linter
+        run: |
+          cd client
+          npm run lint
+      
+      - name: Build backend
+        run: |
+          cd server
+          npm run build
+        continue-on-error: true
+      
+      - name: Build frontend
+        run: |
+          cd client
+          npm run build
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy to Render (Backend)
+        run: |
+          echo "Deploying backend..."
+          # Add your deployment commands here
+      
+      - name: Deploy to Vercel (Frontend)
+        run: |
+          echo "Deploying frontend..."
+          # Add your deployment commands here
