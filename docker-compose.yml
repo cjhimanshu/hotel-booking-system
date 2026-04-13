@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: hotel-booking-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  backend:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: hotel-booking-backend
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://user:password@mongodb:27017/hotel-booking?authSource=admin
+      JWT_SECRET: your_jwt_secret_here
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      - mongodb
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+volumes:
+  mongo_data:
