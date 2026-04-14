@@ -49,18 +49,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
+app.use("/", require("./routes/healthRoutes"));
+app.use("/api", require("./routes/healthRoutes"));
 
 app.get("/", (req, res) => {
   res.json({ message: "Hotel Booking API is running" });
-});
-
-/**
- * Health check endpoint.
- * This is primarily used by platforms like Render to ping the backend
- * and prevent it from sleeping (or to check if it's awake).
- */
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK" });
 });
 
 mongoose

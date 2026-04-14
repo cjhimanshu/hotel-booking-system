@@ -66,3 +66,5 @@
 
 - **GET** `/api/health`
 - **Response**: `{ status, timestamp, uptime, environment }`
+
+The backend also keeps a plain `/health` route for infrastructure checks, but `/api/health` is the documented public endpoint.

@@ -37,12 +37,6 @@
 4. **Start development servers**
 
    ```bash
-   # Terminal 1 - Backend
-   cd server
-   npm run dev
-
-   # Terminal 2 - Frontend
-   cd client
    npm run dev
    ```
 
@@ -60,6 +54,10 @@
 - **docker-compose.yml**: Container orchestration
 
 ## Common Commands
+
+### Root
+
+- `npm run dev` - Start the backend and frontend together
 
 ### Backend
 

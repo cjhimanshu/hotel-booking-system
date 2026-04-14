@@ -84,11 +84,7 @@ VITE_API_URL=http://localhost:5000/api
 ### 4. Start the app
 
 ```bash
-# Terminal 1
-cd server && npm run dev
-
-# Terminal 2
-cd client && npm run dev
+npm run dev
 ```
 
 Frontend runs at http://localhost:5173, backend at http://localhost:5000

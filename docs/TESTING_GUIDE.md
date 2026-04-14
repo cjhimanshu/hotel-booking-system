@@ -46,9 +46,9 @@ describe('Validator Utils', () => {
 
 ### Vitest Setup
 
-1. Already configured in client package.json
-2. Run tests: `npm run test`
-3. Watch mode: `npm run test:watch`
+1. Install dependencies in `client/`
+2. Run tests: `npm run test --prefix client`
+3. Watch mode: `npm run test:watch --prefix client`
 
 ### Component Testing Example
 
