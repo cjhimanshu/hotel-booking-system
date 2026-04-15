@@ -1,6 +1,6 @@
-﻿import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import API from "../services/api";
+﻿import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import API from '../services/api';
 
 const Booking = () => {
   const { id } = useParams();
@@ -9,25 +9,25 @@ const Booking = () => {
   const [step, setStep] = useState(1);
 
   // Step 1: Dates
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
   const [numberOfGuests, setNumberOfGuests] = useState(1);
 
   // Step 2: Guest Details
-  const [guestName, setGuestName] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
-  const [specialRequests, setSpecialRequests] = useState("");
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [specialRequests, setSpecialRequests] = useState('');
 
   // Step 3: Payment
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [paymentMethod, setPaymentMethod] = useState('razorpay');
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Dynamically load Razorpay checkout script if not already present
   const loadRazorpayScript = () =>
     new Promise((resolve) => {
       if (window.Razorpay) return resolve(true);
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
@@ -38,10 +38,12 @@ const Booking = () => {
     checkIn && checkOut
       ? Math.ceil(
           Math.abs(new Date(checkOut) - new Date(checkIn)) /
-            (1000 * 60 * 60 * 24),
+            (1000 * 60 * 60 * 24)
         )
       : 0;
   const totalPrice = nights && room ? nights * room.price : 0;
+  const isDateRangeValid =
+    checkIn && checkOut ? new Date(checkOut) > new Date(checkIn) : false;
 
   useEffect(() => {
     API.get(`/rooms/${id}`)
@@ -49,7 +51,7 @@ const Booking = () => {
         setRoom(res.data);
       })
       .catch((err) => {
-        console.error("Error fetching room:", err);
+        console.error('Error fetching room:', err);
       });
   }, [id]);
 
@@ -57,7 +59,7 @@ const Booking = () => {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    if (paymentMethod === "razorpay") {
+    if (paymentMethod === 'razorpay') {
       // ── Razorpay path ─────────────────────────────────────────────────────
       // isProcessing is reset inside every Razorpay callback, NOT in finally,
       // because rzp.open() is non-blocking (popup stays open asynchronously).
@@ -65,39 +67,39 @@ const Booking = () => {
         const scriptLoaded = await loadRazorpayScript();
         if (!scriptLoaded) {
           alert(
-            "Failed to load Razorpay payment gateway. Please check your internet connection and try again.",
+            'Failed to load Razorpay payment gateway. Please check your internet connection and try again.'
           );
           setIsProcessing(false);
           return;
         }
 
-        const { data: orderData } = await API.post("/payment/create-order", {
+        const { data: orderData } = await API.post('/payment/create-order', {
           amount: totalPrice,
         });
-        const { data: keyData } = await API.get("/payment/key");
+        const { data: keyData } = await API.get('/payment/key');
 
         const options = {
           key: keyData.key,
           amount: orderData.amount,
           currency: orderData.currency,
-          name: "Luxury Stay Hotel",
+          name: 'Luxury Stay Hotel',
           description: `Booking for ${room.type}`,
           order_id: orderData.id,
           handler: async function (response) {
             try {
-              const { data: verifyData } = await API.post("/payment/verify", {
+              const { data: verifyData } = await API.post('/payment/verify', {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
               });
               if (verifyData.success) {
-                await API.post("/bookings", {
+                await API.post('/bookings', {
                   room: id,
                   checkIn,
                   checkOut,
                   numberOfGuests,
                   totalPrice,
-                  paymentMethod: "razorpay",
+                  paymentMethod: 'razorpay',
                   guestDetails: {
                     name: guestName,
                     email: guestEmail,
@@ -105,26 +107,26 @@ const Booking = () => {
                     paymentId: response.razorpay_payment_id,
                   },
                 });
-                alert("Booking confirmed! Payment processed successfully.");
+                alert('Booking confirmed! Payment processed successfully.');
                 setIsProcessing(false);
-                navigate("/my-bookings");
+                navigate('/my-bookings');
               }
             } catch (error) {
-              console.error("Booking creation error:", error);
+              console.error('Booking creation error:', error);
               const msg = error.response?.data?.message || error.message;
-              if (msg === "Room not available") {
+              if (msg === 'Room not available') {
                 alert(
-                  "This room is already booked for the selected dates.\n\nYour payment (ID: " +
+                  'This room is already booked for the selected dates.\n\nYour payment (ID: ' +
                     response.razorpay_payment_id +
-                    ") will be refunded within 5-7 business days.\nPlease contact support if needed.",
+                    ') will be refunded within 5-7 business days.\nPlease contact support if needed.'
                 );
               } else {
                 alert(
-                  "Booking failed: " +
+                  'Booking failed: ' +
                     msg +
-                    "\nYour payment ID: " +
+                    '\nYour payment ID: ' +
                     response.razorpay_payment_id +
-                    "\nPlease contact support.",
+                    '\nPlease contact support.'
                 );
               }
               setIsProcessing(false);
@@ -137,12 +139,12 @@ const Booking = () => {
             },
           },
           prefill: { name: guestName, email: guestEmail },
-          theme: { color: "#D97706" },
+          theme: { color: '#D97706' },
         };
 
         const rzp = new window.Razorpay(options);
-        rzp.on("payment.failed", function (response) {
-          alert("Payment failed: " + response.error.description);
+        rzp.on('payment.failed', function (response) {
+          alert('Payment failed: ' + response.error.description);
           setIsProcessing(false);
         });
         rzp.open();
@@ -150,17 +152,17 @@ const Booking = () => {
         // Each callback above handles it.
       } catch (error) {
         // Errors during setup (create-order / get-key API calls)
-        console.error("Error initiating payment:", error);
+        console.error('Error initiating payment:', error);
         alert(
-          "Could not initiate payment: " +
-            (error.response?.data?.message || error.message),
+          'Could not initiate payment: ' +
+            (error.response?.data?.message || error.message)
         );
         setIsProcessing(false);
       }
     } else {
       // ── Cash payment path ─────────────────────────────────────────────────
       try {
-        await API.post("/bookings", {
+        await API.post('/bookings', {
           room: id,
           checkIn,
           checkOut,
@@ -173,13 +175,13 @@ const Booking = () => {
             specialRequests,
           },
         });
-        alert("Booking confirmed! You can pay at the hotel.");
-        navigate("/my-bookings");
+        alert('Booking confirmed! You can pay at the hotel.');
+        navigate('/my-bookings');
       } catch (error) {
-        console.error("Error booking room:", error);
+        console.error('Error booking room:', error);
         alert(
-          "Error booking room: " +
-            (error.response?.data?.message || error.message),
+          'Error booking room: ' +
+            (error.response?.data?.message || error.message)
         );
       } finally {
         setIsProcessing(false);
@@ -189,12 +191,16 @@ const Booking = () => {
 
   const nextStep = () => {
     if (step === 1 && (!checkIn || !checkOut)) {
-      alert("Please select check-in and check-out dates");
+      alert('Please select check-in and check-out dates');
+      return;
+    }
+    if (step === 1 && !isDateRangeValid) {
+      alert('Check-out date must be after check-in date');
       return;
     }
     if (step === 2) {
       if (!guestName || !guestEmail) {
-        alert("Please fill in all guest details");
+        alert('Please fill in all guest details');
         return;
       }
     }
@@ -204,7 +210,7 @@ const Booking = () => {
   // Auto-fill email from account when reaching step 2
   useEffect(() => {
     if (step === 2) {
-      API.get("/verify/verified-contacts")
+      API.get('/verify/verified-contacts')
         .then((res) => {
           if (res.data.verifiedEmail) {
             setGuestEmail(res.data.verifiedEmail);
@@ -218,7 +224,7 @@ const Booking = () => {
 
   const prevStep = () => {
     if (step === 1) {
-      navigate("/rooms");
+      navigate('/rooms');
     } else {
       setStep(step - 1);
     }
@@ -226,18 +232,18 @@ const Booking = () => {
 
   // Handle browser back button to step through checkout instead of leaving
   useEffect(() => {
-    window.history.pushState({ step }, "", window.location.href);
+    window.history.pushState({ step }, '', window.location.href);
     const handlePopState = () => {
       if (step > 1) {
         setStep((prev) => prev - 1);
-        window.history.pushState({ step: step - 1 }, "", window.location.href);
+        window.history.pushState({ step: step - 1 }, '', window.location.href);
       } else {
-        navigate("/rooms");
+        navigate('/rooms');
       }
     };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [step]);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [navigate, step]);
 
   if (!room)
     return (
@@ -254,28 +260,28 @@ const Booking = () => {
           <div className="flex items-center justify-between mb-2">
             <span
               className={`text-xs sm:text-sm font-semibold ${
-                step >= 1 ? "text-amber-600" : "text-gray-400"
+                step >= 1 ? 'text-amber-600' : 'text-gray-400'
               }`}
             >
               Dates
             </span>
             <span
               className={`text-xs sm:text-sm font-semibold ${
-                step >= 2 ? "text-amber-600" : "text-gray-400"
+                step >= 2 ? 'text-amber-600' : 'text-gray-400'
               }`}
             >
               Details
             </span>
             <span
               className={`text-xs sm:text-sm font-semibold ${
-                step >= 3 ? "text-amber-600" : "text-gray-400"
+                step >= 3 ? 'text-amber-600' : 'text-gray-400'
               }`}
             >
               Payment
             </span>
             <span
               className={`text-xs sm:text-sm font-semibold ${
-                step >= 4 ? "text-amber-600" : "text-gray-400"
+                step >= 4 ? 'text-amber-600' : 'text-gray-400'
               }`}
             >
               Confirm
@@ -298,7 +304,7 @@ const Booking = () => {
                 alt={room.name || room.type}
                 className="w-full h-full object-cover opacity-50"
                 onError={(e) => {
-                  e.target.style.display = "none";
+                  e.target.style.display = 'none';
                 }}
               />
             ) : (
@@ -332,7 +338,7 @@ const Booking = () => {
                       type="date"
                       value={checkIn}
                       onChange={(e) => setCheckIn(e.target.value)}
-                      min={new Date().toISOString().split("T")[0]}
+                      min={new Date().toISOString().split('T')[0]}
                       className="w-full border-2 border-gray-300 px-4 py-3 rounded-lg focus:border-amber-500 focus:outline-none"
                       required
                     />
@@ -345,7 +351,7 @@ const Booking = () => {
                       type="date"
                       value={checkOut}
                       onChange={(e) => setCheckOut(e.target.value)}
-                      min={checkIn || new Date().toISOString().split("T")[0]}
+                      min={checkIn || new Date().toISOString().split('T')[0]}
                       className="w-full border-2 border-gray-300 px-4 py-3 rounded-lg focus:border-amber-500 focus:outline-none"
                       required
                     />
@@ -362,7 +368,7 @@ const Booking = () => {
                   >
                     {[1, 2, 3, 4, 5, 6].map((num) => (
                       <option key={num} value={num}>
-                        {num} Guest{num > 1 ? "s" : ""}
+                        {num} Guest{num > 1 ? 's' : ''}
                       </option>
                     ))}
                   </select>
@@ -393,6 +399,11 @@ const Booking = () => {
                     </div>
                   </div>
                 )}
+                {checkIn && checkOut && !isDateRangeValid && (
+                  <div className="bg-red-50 border-2 border-red-200 text-red-700 p-4 rounded-lg">
+                    Check-out date must be after check-in date.
+                  </div>
+                )}
                 <div className="flex gap-4">
                   <button
                     onClick={prevStep}
@@ -402,6 +413,7 @@ const Booking = () => {
                   </button>
                   <button
                     onClick={nextStep}
+                    disabled={checkIn && checkOut && !isDateRangeValid}
                     className="w-2/3 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-4 rounded-lg hover:from-amber-700 hover:to-orange-700 font-semibold text-lg transition-all shadow-lg"
                   >
                     Continue to Guest Details
@@ -490,7 +502,7 @@ const Booking = () => {
                     <input
                       type="radio"
                       value="razorpay"
-                      checked={paymentMethod === "razorpay"}
+                      checked={paymentMethod === 'razorpay'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="mr-4 w-5 h-5 text-amber-600"
                     />
@@ -508,7 +520,7 @@ const Booking = () => {
                     <input
                       type="radio"
                       value="cash"
-                      checked={paymentMethod === "cash"}
+                      checked={paymentMethod === 'cash'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="mr-4 w-5 h-5 text-amber-600"
                     />
@@ -586,14 +598,14 @@ const Booking = () => {
                         <span className="font-semibold">Name:</span> {guestName}
                       </p>
                       <p className="text-gray-700">
-                        <span className="font-semibold">Email:</span>{" "}
+                        <span className="font-semibold">Email:</span>{' '}
                         {guestEmail}
                       </p>
                       {specialRequests && (
                         <p className="text-gray-700">
                           <span className="font-semibold">
                             Special Requests:
-                          </span>{" "}
+                          </span>{' '}
                           {specialRequests}
                         </p>
                       )}
@@ -604,7 +616,7 @@ const Booking = () => {
                       Payment Method
                     </h3>
                     <p className="text-gray-700 capitalize">
-                      {paymentMethod.replace("_", " ")}
+                      {paymentMethod.replace('_', ' ')}
                     </p>
                   </div>
                   <div className="bg-amber-100 p-4 rounded-lg">
