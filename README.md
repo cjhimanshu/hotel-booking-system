@@ -1,100 +1,107 @@
 # Hotel Booking System
 
-Hotel booking web app built using the MERN stack. I built it to learn how real-world booking systems work, from user login and room management to actual payment processing with Razorpay.
-
-The app is fully deployed and working. You can create an account, browse rooms, book one with real payment (test mode), and also manage everything from an admin panel.
+A production-minded hotel booking web application built with the MERN stack (MongoDB, Express, React, Node). It includes user authentication, room management, booking flows, and online payments (Razorpay). The project demonstrates a full-stack deployment workflow and common real-world features for booking platforms.
 
 Live demo: https://hotel-booking-system-eight-self.vercel.app
 
 ---
 
-## What it does
+## Features
 
-- Register / Login with JWT authentication
-- Email OTP verification before checkout (using Resend API)
-- Browse hotel rooms with filters by category
-- Book a room with check-in / check-out dates
-- Pay online via Razorpay or choose pay at hotel
-- View your booking history
-- Admin can add/delete rooms, upload images, and see all bookings with revenue stats
+- User registration, login and JWT-based authentication
+- Email OTP verification (Resend) and optional SMS OTP (Fast2SMS)
+- Browse and filter rooms by category, availability and features
+- Create bookings with check-in / check-out dates and view booking history
+- Pay online via Razorpay (test mode) or choose pay-at-hotel
+- Admin panel: add/update/delete rooms, upload images, view bookings and revenue stats
 
 ---
 
 ## Tech Stack
 
-**Frontend** — React, Vite, Tailwind CSS, React Router, Axios
-
-**Backend** — Node.js, Express.js, MongoDB Atlas, Mongoose, JWT, Multer
-
-**Other** — Razorpay (payments), Resend (email OTP), Fast2SMS (SMS OTP), Vercel (frontend), Render (backend)
-
----
-
-## Why I chose these technologies
-
-I used React because I wanted to learn component-based UI properly. For the backend I went with Express since it's straightforward and doesn't hide too much. MongoDB made sense for this project because booking and room data doesn't need strict relational structure. I chose Razorpay over Stripe because it supports Indian payments natively and has a good test mode.
-
-The hardest part was getting the Razorpay webhook flow right — the payment popup is non-blocking so you can't use a simple try/catch around `rzp.open()`. I had to handle success, failure, and dismiss separately.
+- Frontend: React, Vite, Tailwind CSS, React Router, Axios
+- Backend: Node.js, Express.js, MongoDB Atlas, Mongoose
+- Auth & Uploads: JWT, Multer
+- Payments & Notifications: Razorpay, Resend, Fast2SMS
 
 ---
 
-## Running locally
+## Quick Start (development)
 
-### Prerequisites
+Prerequisites: `Node.js` (v16+), `npm` or `pnpm`, and access to a MongoDB instance.
 
-Make sure you have the following installed on your machine:
-
-- [Node.js](https://nodejs.org/) (v16 or higher)
-- [Git](https://git-scm.com/)
-
-### 1. Clone the repo
+1. Clone the repo
 
 ```bash
-git clone https://github.com/cjhimanshu/hotel-booking-system
+git clone https://github.com/cjhimanshu/hotel-booking-system.git
 cd hotel-booking-system
 ```
 
-### 2. Install dependencies
+2. Install dependencies
 
 ```bash
 cd server && npm install
 cd ../client && npm install
+cd ..
 ```
 
-### 3. Set up environment variables
+3. Environment variables
 
-Create `server/.env` (copy from `server/.env.example`):
+Copy and edit examples:
+
+- `server/.env.example` -> `server/.env`
+- `client/.env.example` -> `client/.env` (if present)
+
+Minimum `server/.env` values:
 
 ```
 PORT=5000
-MONGO_URI=<your_mongodb_atlas_connection_string>
-JWT_SECRET=<make_up_any_long_random_string>
-RAZORPAY_KEY_ID=<from_razorpay_dashboard>
-RAZORPAY_KEY_SECRET=<from_razorpay_dashboard>
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=some_long_random_string
+RAZORPAY_KEY_ID=rzp_test_xxx
+RAZORPAY_KEY_SECRET=rzp_secret_xxx
 FRONTEND_URL=http://localhost:5173
-RESEND_API_KEY=<from_resend.com_dashboard>
-FAST2SMS_API_KEY=<from_fast2sms.com_dashboard>
+RESEND_API_KEY=xxx
+FAST2SMS_API_KEY=xxx
 ```
 
-Create `client/.env`:
+Client example (`client/.env`):
 
-```env
+```
 VITE_API_URL=http://localhost:5000/api
 ```
 
-### 4. Start the app
+4. Run locally (two terminals)
 
 ```bash
+# terminal 1 - backend
+cd server
+npm run dev
+
+# terminal 2 - frontend
+cd client
 npm run dev
 ```
 
-Frontend runs at http://localhost:5173, backend at http://localhost:5000
+Frontend: http://localhost:5173 — Backend API: http://localhost:5000/api
 
 ---
 
-## Deployment
+## Useful scripts
 
-Frontend is on Vercel, backend is on Render. I initially tried deploying both on Vercel as a monorepo but ran into cold start issues with serverless functions, so split them. Render free tier does sleep after inactivity but wakes up in about 30–50 seconds on first request.
+- Root (monorepo helpers): `npm run dev` (if configured)
+- Server: `cd server && npm run dev`, `npm run start`
+- Client: `cd client && npm run dev`, `npm run build`
+
+Check `server/package.json` and `client/package.json` for full scripts.
+
+---
+
+## Deployment notes
+
+- Frontend is deployed on Vercel; backend is deployed on Render in the current setup.
+- Razorpay webhooks require a public endpoint; ensure the `RAZORPAY_KEY_*` secrets are configured in deployment environment.
+- For production, set `NODE_ENV=production`, enable proper CORS origins, and secure environment secrets.
 
 ---
 
@@ -102,30 +109,24 @@ Frontend is on Vercel, backend is on Render. I initially tried deploying both on
 
 ```
 hotel-booking-system/
-├── client/               # React frontend
-│   └── src/
-│       ├── components/   # Navbar, ProtectedRoute, AdminRoute
-│       ├── context/      # AuthContext
-│       ├── pages/        # Rooms, Booking, Login, Register, AdminDashboard etc.
-│       └── services/     # Axios API config
-│
-├── server/               # Express backend
-│   ├── controllers/      # Auth, Booking, Payment, Room, Verification
-│   ├── middleware/       # JWT auth, error handler
-│   ├── models/           # User, Room, Booking schemas
-│   ├── routes/           # All API routes
-│   └── server.js
-│
-└── docs/                 # Extra setup notes
+├─ client/           # React frontend
+├─ server/           # Express backend (controllers, routes, models, middleware)
+├─ docs/             # Documentation and guides
+├─ uploads/          # Uploaded images (ignored in git)
 ```
 
 ---
 
-## About
+## Contributing
 
-Built by **Himanshu Kumar**.
+Contributions and issues are welcome. Please read `CONTRIBUTING.md` for the code style and pull request process.
 
-- GitHub: [github.com/cjhimanshu](https://github.com/cjhimanshu)
-- LinkedIn: [linkedin.com/in/himanshu-kumar-02ab40249](https://www.linkedin.com/in/himanshu-kumar-02ab40249)
+---
 
-Feel free to use this as reference for your own projects. If you find a bug or want to suggest something, open an issue.
+## Author
+
+Built by Himanshu Kumar — https://github.com/cjhimanshu
+
+---
+
+If you'd like a shorter README variant, badges, or automatic status checks added, tell me what you'd prefer and I will update it.
