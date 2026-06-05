@@ -1,4 +1,5 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
+const logger = require('./logger');
 
 const sendEmail = async ({ to, subject, html }) => {
   const emailUser = process.env.EMAIL_USER;
@@ -7,24 +8,24 @@ const sendEmail = async ({ to, subject, html }) => {
   if (!emailUser || !emailPass) {
     // Extract reset URL from html so dev can still test
     const urlMatch = html.match(/href="([^"]*reset-password[^"]*)"/);
-    console.error(
-      "\n❌ EMAIL NOT CONFIGURED — set EMAIL_USER and EMAIL_PASS in server/.env",
+    logger.error(
+      'EMAIL NOT CONFIGURED — set EMAIL_USER and EMAIL_PASS in server/.env'
     );
-    console.error(
-      "   Gmail requires a 16-character App Password (not your account password).",
+    logger.error(
+      'Gmail requires a 16-character App Password (not your account password).'
     );
-    console.error(
-      "   Go to: https://myaccount.google.com/apppasswords to generate one.\n",
+    logger.error(
+      'Go to: https://myaccount.google.com/apppasswords to generate one.'
     );
     if (urlMatch) {
-      console.log("📧 [DEV FALLBACK] Email would have been sent to:", to);
-      console.log("🔗 Use this reset URL to test:", urlMatch[1], "\n");
+      logger.info('[DEV FALLBACK] Email would have been sent to:', { to });
+      logger.debug('DEV reset URL:', { url: urlMatch[1] });
     }
-    throw new Error("EMAIL_NOT_CONFIGURED");
+    throw new Error('EMAIL_NOT_CONFIGURED');
   }
 
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false, // STARTTLS
     auth: {

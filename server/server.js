@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
+const logger = require('./utils/logger');
 
 // Ensure uploads directory exists (important for Render deployments)
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -58,9 +59,9 @@ app.get('/', (req, res) => {
 
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
+  .then(() => logger.info('✅ MongoDB Connected'))
   .catch((err) => {
-    console.error('❌ MongoDB Error:', err.message);
+    logger.error('❌ MongoDB Error:', err.message);
     process.exit(1);
   });
 
@@ -71,7 +72,7 @@ app.use('/api/verify', require('./routes/verificationRoutes'));
 try {
   app.use('/api/payment', require('./routes/paymentRoutes'));
 } catch (error) {
-  console.error('Error loading payment routes:', error.message);
+  logger.error('Error loading payment routes:', error.message);
 }
 
 // For Vercel serverless
@@ -80,12 +81,12 @@ if (process.env.VERCEL) {
 } else {
   // For local development and Render
   const server = app.listen(process.env.PORT || 5000, () =>
-    console.log(`Server running on port ${process.env.PORT || 5000}`)
+    logger.info(`Server running on port ${process.env.PORT || 5000}`)
   );
   process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
+    logger.error('Uncaught Exception:', error);
   });
   process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   });
 }

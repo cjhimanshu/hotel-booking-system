@@ -1,4 +1,5 @@
 // Error tracking and monitoring utility
+const logger = require('./logger');
 class ErrorTracker {
   static logError(error, context = {}) {
     const errorLog = {
@@ -9,9 +10,9 @@ class ErrorTracker {
       severity: this.determineSeverity(error),
     };
 
-    // Log to console in development
+    // Log to configured logger in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('ERROR TRACKED:', errorLog);
+      logger.error('ERROR TRACKED:', errorLog);
     }
 
     // Send to error tracking service (e.g., Sentry)
@@ -27,11 +28,11 @@ class ErrorTracker {
   }
 
   static logWarning(message, context = {}) {
-    console.warn(`[WARNING] ${message}`, context);
+    logger.warn(`[WARNING] ${message}`, context);
   }
 
   static logInfo(message, context = {}) {
-    console.log(`[INFO] ${message}`, context);
+    logger.info(`[INFO] ${message}`, context);
   }
 }
 

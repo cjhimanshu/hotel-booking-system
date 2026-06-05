@@ -1,8 +1,9 @@
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const sendEmail = require("../utils/sendEmail");
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
+const logger = require('../utils/logger');
 
 exports.register = async (req, res) => {
   try {
@@ -14,7 +15,7 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "user", // Allow setting role during registration
+      role: role || 'user', // Allow setting role during registration
     });
 
     res.json(user);
@@ -28,23 +29,23 @@ exports.login = async (req, res) => {
     const { email, password, role } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Wrong password" });
+    if (!isMatch) return res.status(400).json({ message: 'Wrong password' });
 
     // Verify the selected role matches the user's actual role
     if (role && user.role !== role) {
       return res.status(403).json({
         message: `This account is registered as ${
-          user.role === "admin" ? "Hotel Admin" : "Guest/User"
+          user.role === 'admin' ? 'Hotel Admin' : 'Guest/User'
         }. Please select the correct login type.`,
       });
     }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET
     );
 
     res.json({ token });
@@ -54,7 +55,7 @@ exports.login = async (req, res) => {
 };
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -70,33 +71,33 @@ exports.forgotPassword = async (req, res) => {
     // Always respond with success to prevent email enumeration
     if (!user) {
       return res.json({
-        message: "If that email exists, a reset link has been sent.",
+        message: 'If that email exists, a reset link has been sent.',
       });
     }
 
     // Generate a secure random token
-    const rawToken = crypto.randomBytes(32).toString("hex");
+    const rawToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto
-      .createHash("sha256")
+      .createHash('sha256')
       .update(rawToken)
-      .digest("hex");
+      .digest('hex');
 
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
     const resetUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:5173"
+      process.env.FRONTEND_URL || 'http://localhost:5173'
     }/reset-password/${rawToken}`;
 
-    // Always log to server console for development/debugging
-    console.log("\n🔑 Password reset requested for:", user.email);
-    console.log("🔗 Reset URL (valid 1 hour):", resetUrl, "\n");
+    // Log using the central logger. Use debug level so URLs aren't exposed in production.
+    logger.debug('Password reset requested for:', { email: user.email });
+    logger.debug('Reset URL (valid 1 hour):', { url: resetUrl });
 
     try {
       await sendEmail({
         to: user.email,
-        subject: "Password Reset Request – Luxury Stay",
+        subject: 'Password Reset Request – Luxury Stay',
         html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
           <h2 style="color:#1d4ed8;">🏨 Luxury Stay – Password Reset</h2>
@@ -117,28 +118,28 @@ exports.forgotPassword = async (req, res) => {
       `,
       });
       return res.json({
-        message: "If that email exists, a reset link has been sent.",
+        message: 'If that email exists, a reset link has been sent.',
       });
     } catch (emailError) {
-      if (emailError.message === "EMAIL_NOT_CONFIGURED") {
+      if (emailError.message === 'EMAIL_NOT_CONFIGURED') {
         // Token is saved — dev can use the console URL to test the flow
         return res.status(503).json({
           message:
-            "Email service is not configured. Please set EMAIL_USER and EMAIL_PASS in server/.env (Gmail App Password required). Check the server console for the reset link.",
+            'Email service is not configured. Please set EMAIL_USER and EMAIL_PASS in server/.env (Gmail App Password required). Check the server console for the reset link.',
         });
       }
       // Real SMTP / auth error
-      console.error("SMTP send error:", emailError.message);
+      logger.error('SMTP send error:', { message: emailError.message });
       return res.status(500).json({
         message:
-          "Failed to send reset email. Please verify your EMAIL_USER and EMAIL_PASS (must be a Gmail App Password). Check server logs for details.",
+          'Failed to send reset email. Please verify your EMAIL_USER and EMAIL_PASS (must be a Gmail App Password). Check server logs for details.',
       });
     }
   } catch (error) {
-    console.error("Forgot password error:", error);
+    logger.error('Forgot password error:', { error });
     res
       .status(500)
-      .json({ message: "Failed to send reset email. Please try again." });
+      .json({ message: 'Failed to send reset email. Please try again.' });
   }
 };
 
@@ -151,10 +152,10 @@ exports.resetPassword = async (req, res) => {
     if (!password || password.length < 6) {
       return res
         .status(400)
-        .json({ message: "Password must be at least 6 characters." });
+        .json({ message: 'Password must be at least 6 characters.' });
     }
 
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
@@ -164,7 +165,7 @@ exports.resetPassword = async (req, res) => {
     if (!user) {
       return res
         .status(400)
-        .json({ message: "Reset link is invalid or has expired." });
+        .json({ message: 'Reset link is invalid or has expired.' });
     }
 
     user.password = await bcrypt.hash(password, 10);
@@ -172,9 +173,9 @@ exports.resetPassword = async (req, res) => {
     user.resetPasswordExpires = null;
     await user.save();
 
-    res.json({ message: "Password reset successful. You can now log in." });
+    res.json({ message: 'Password reset successful. You can now log in.' });
   } catch (error) {
-    console.error("Reset password error:", error);
+    logger.error('Reset password error:', { error });
     res.status(500).json({ message: error.message });
   }
 };

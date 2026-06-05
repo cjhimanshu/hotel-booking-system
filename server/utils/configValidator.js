@@ -1,4 +1,6 @@
 // Configuration validator to ensure app starts correctly
+const logger = require('./logger');
+
 const validateConfig = () => {
   const requiredEnvVars = [
     'PORT',
@@ -22,12 +24,12 @@ const validateConfig = () => {
   }
 
   if (errors.length > 0) {
-    console.error('Configuration Validation Errors:');
-    errors.forEach((error) => console.error(`  - ${error}`));
+    logger.error('Configuration Validation Errors:');
+    errors.forEach((error) => logger.error(`  - ${error}`));
     process.exit(1);
   }
 
-  console.log('✓ Configuration validation passed');
+  logger.info('✓ Configuration validation passed');
   return true;
 };
 

@@ -6,6 +6,8 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+const logger = require('../utils/logger');
+
 exports.createOrder = async (req, res) => {
   try {
     const { amount, currency = 'INR' } = req.body;
@@ -20,11 +22,9 @@ exports.createOrder = async (req, res) => {
     const normalizedCurrency = String(currency).toUpperCase();
     const supportedCurrencies = ['INR'];
     if (!supportedCurrencies.includes(normalizedCurrency)) {
-      return res
-        .status(400)
-        .json({
-          message: `Unsupported currency. Allowed: ${supportedCurrencies.join(', ')}`,
-        });
+      return res.status(400).json({
+        message: `Unsupported currency. Allowed: ${supportedCurrencies.join(', ')}`,
+      });
     }
 
     const options = {
@@ -36,7 +36,7 @@ exports.createOrder = async (req, res) => {
     const order = await razorpay.orders.create(options);
     res.json(order);
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
+    logger.error('Error creating Razorpay order:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -65,7 +65,7 @@ exports.verifyPayment = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error verifying payment:', error);
+    logger.error('Error verifying payment:', error);
     res.status(500).json({ message: error.message });
   }
 };
