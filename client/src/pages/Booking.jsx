@@ -17,6 +17,8 @@ const Booking = () => {
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
+  const [emailError, setEmailError] = useState(null);
+  const [emailLoading, setEmailLoading] = useState(false);
 
   // Step 3: Payment
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
@@ -198,9 +200,25 @@ const Booking = () => {
       alert('Check-out date must be after check-in date');
       return;
     }
+    // Validate guest count against room.maxGuests if available
+    if (step === 1 && room?.maxGuests && numberOfGuests > room.maxGuests) {
+      alert(`This room accommodates a maximum of ${room.maxGuests} guests`);
+      return;
+    }
     if (step === 2) {
       if (!guestName || !guestEmail) {
         alert('Please fill in all guest details');
+        return;
+      }
+      // Basic name validation
+      if (guestName.trim().length < 2) {
+        alert('Please enter a valid name (at least 2 characters)');
+        return;
+      }
+      // Basic email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(guestEmail)) {
+        alert('Please enter a valid email address');
         return;
       }
     }
@@ -210,6 +228,8 @@ const Booking = () => {
   // Auto-fill email from account when reaching step 2
   useEffect(() => {
     if (step === 2) {
+      setEmailLoading(true);
+      setEmailError(null);
       API.get('/verify/verified-contacts')
         .then((res) => {
           if (res.data.verifiedEmail) {
@@ -218,7 +238,13 @@ const Booking = () => {
             setGuestEmail(res.data.accountEmail);
           }
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.warn('Could not auto-fill email:', err?.message || err);
+          setEmailError(
+            'Could not retrieve saved email. Please enter manually.'
+          );
+        })
+        .finally(() => setEmailLoading(false));
     }
   }, [step]);
 
@@ -331,10 +357,14 @@ const Booking = () => {
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="booking-check-in"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Check-In Date
                     </label>
                     <input
+                      id="booking-check-in"
                       type="date"
                       value={checkIn}
                       onChange={(e) => setCheckIn(e.target.value)}
@@ -344,10 +374,14 @@ const Booking = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="booking-check-out"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Check-Out Date
                     </label>
                     <input
+                      id="booking-check-out"
                       type="date"
                       value={checkOut}
                       onChange={(e) => setCheckOut(e.target.value)}
@@ -358,17 +392,29 @@ const Booking = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Number of Guests
+                  <label
+                    htmlFor="booking-guests"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Number of Guests{' '}
+                    {room?.maxGuests && `(Max: ${room.maxGuests})`}
                   </label>
                   <select
+                    id="booking-guests"
                     value={numberOfGuests}
                     onChange={(e) => setNumberOfGuests(Number(e.target.value))}
                     className="w-full border-2 border-gray-300 px-4 py-3 rounded-lg focus:border-amber-500 focus:outline-none"
                   >
                     {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <option key={num} value={num}>
+                      <option
+                        key={num}
+                        value={num}
+                        disabled={room?.maxGuests && num > room.maxGuests}
+                      >
                         {num} Guest{num > 1 ? 's' : ''}
+                        {room?.maxGuests && num > room.maxGuests
+                          ? ' (exceeds limit)'
+                          : ''}
                       </option>
                     ))}
                   </select>
@@ -431,10 +477,14 @@ const Booking = () => {
                 <div className="space-y-4">
                   {/* Full Name */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="booking-full-name"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Full Name *
                     </label>
                     <input
+                      id="booking-full-name"
                       type="text"
                       value={guestName}
                       onChange={(e) => setGuestName(e.target.value)}
@@ -446,10 +496,14 @@ const Booking = () => {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="booking-email"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Email Address *
                     </label>
                     <input
+                      id="booking-email"
                       type="email"
                       value={guestEmail}
                       onChange={(e) => setGuestEmail(e.target.value)}
@@ -457,14 +511,28 @@ const Booking = () => {
                       className="w-full border-2 border-gray-300 px-4 py-3 rounded-lg focus:border-amber-500 focus:outline-none"
                       required
                     />
+                    {emailLoading && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Auto-filling email…
+                      </p>
+                    )}
+                    {emailError && (
+                      <p className="text-sm text-amber-600 mt-1">
+                        {emailError}
+                      </p>
+                    )}
                   </div>
 
                   {/* Special Requests */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="booking-special-requests"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Special Requests (Optional)
                     </label>
                     <textarea
+                      id="booking-special-requests"
                       value={specialRequests}
                       onChange={(e) => setSpecialRequests(e.target.value)}
                       placeholder="Early check-in, late check-out, room preferences, etc."
