@@ -19,6 +19,8 @@ const Booking = () => {
   const [specialRequests, setSpecialRequests] = useState('');
   const [emailError, setEmailError] = useState(null);
   const [emailLoading, setEmailLoading] = useState(false);
+  // UI messages for non-blocking feedback (replaces most alerts)
+  const [formMessage, setFormMessage] = useState(null);
 
   // Step 3: Payment
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
@@ -68,9 +70,10 @@ const Booking = () => {
       try {
         const scriptLoaded = await loadRazorpayScript();
         if (!scriptLoaded) {
-          alert(
-            'Failed to load Razorpay payment gateway. Please check your internet connection and try again.'
-          );
+          setFormMessage({
+            type: 'error',
+            text: 'Failed to load payment gateway. Check your internet connection and try again.',
+          });
           setIsProcessing(false);
           return;
         }
@@ -109,7 +112,10 @@ const Booking = () => {
                     paymentId: response.razorpay_payment_id,
                   },
                 });
-                alert('Booking confirmed! Payment processed successfully.');
+                setFormMessage({
+                  type: 'success',
+                  text: 'Booking confirmed! Payment processed successfully.',
+                });
                 setIsProcessing(false);
                 navigate('/my-bookings');
               }
@@ -117,19 +123,23 @@ const Booking = () => {
               console.error('Booking creation error:', error);
               const msg = error.response?.data?.message || error.message;
               if (msg === 'Room not available') {
-                alert(
-                  'This room is already booked for the selected dates.\n\nYour payment (ID: ' +
+                setFormMessage({
+                  type: 'error',
+                  text:
+                    'This room is already booked for the selected dates. Your payment (ID: ' +
                     response.razorpay_payment_id +
-                    ') will be refunded within 5-7 business days.\nPlease contact support if needed.'
-                );
+                    ') will be refunded within 5-7 business days. Please contact support if needed.',
+                });
               } else {
-                alert(
-                  'Booking failed: ' +
+                setFormMessage({
+                  type: 'error',
+                  text:
+                    'Booking failed: ' +
                     msg +
-                    '\nYour payment ID: ' +
+                    '. Your payment ID: ' +
                     response.razorpay_payment_id +
-                    '\nPlease contact support.'
-                );
+                    '. Please contact support.',
+                });
               }
               setIsProcessing(false);
             }
@@ -146,7 +156,7 @@ const Booking = () => {
 
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response) {
-          alert('Payment failed: ' + response.error.description);
+          setFormMessage({ type: 'error', text: 'Payment failed: ' + response.error.description });
           setIsProcessing(false);
         });
         rzp.open();
@@ -155,10 +165,10 @@ const Booking = () => {
       } catch (error) {
         // Errors during setup (create-order / get-key API calls)
         console.error('Error initiating payment:', error);
-        alert(
-          'Could not initiate payment: ' +
-            (error.response?.data?.message || error.message)
-        );
+        setFormMessage({
+          type: 'error',
+          text: 'Could not initiate payment: ' + (error.response?.data?.message || error.message),
+        });
         setIsProcessing(false);
       }
     } else {
@@ -177,14 +187,14 @@ const Booking = () => {
             specialRequests,
           },
         });
-        alert('Booking confirmed! You can pay at the hotel.');
+        setFormMessage({ type: 'success', text: 'Booking confirmed! You can pay at the hotel.' });
         navigate('/my-bookings');
       } catch (error) {
         console.error('Error booking room:', error);
-        alert(
-          'Error booking room: ' +
-            (error.response?.data?.message || error.message)
-        );
+        setFormMessage({
+          type: 'error',
+          text: 'Error booking room: ' + (error.response?.data?.message || error.message),
+        });
       } finally {
         setIsProcessing(false);
       }
@@ -192,12 +202,14 @@ const Booking = () => {
   };
 
   const nextStep = () => {
+    // Clear previous messages
+    setFormMessage(null);
     if (step === 1 && (!checkIn || !checkOut)) {
-      alert('Please select check-in and check-out dates');
+      setFormMessage({ type: 'error', text: 'Please select check-in and check-out dates' });
       return;
     }
     if (step === 1 && !isDateRangeValid) {
-      alert('Check-out date must be after check-in date');
+      setFormMessage({ type: 'error', text: 'Check-out date must be after check-in date' });
       return;
     }
     // Validate guest count against room.maxGuests if available
@@ -207,18 +219,18 @@ const Booking = () => {
     }
     if (step === 2) {
       if (!guestName || !guestEmail) {
-        alert('Please fill in all guest details');
+        setFormMessage({ type: 'error', text: 'Please fill in all guest details' });
         return;
       }
       // Basic name validation
       if (guestName.trim().length < 2) {
-        alert('Please enter a valid name (at least 2 characters)');
+        setFormMessage({ type: 'error', text: 'Please enter a valid name (at least 2 characters)' });
         return;
       }
       // Basic email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(guestEmail)) {
-        alert('Please enter a valid email address');
+        setFormMessage({ type: 'error', text: 'Please enter a valid email address' });
         return;
       }
     }
@@ -349,6 +361,17 @@ const Booking = () => {
           </div>
 
           <div className="p-4 sm:p-8">
+            {formMessage && (
+              <div
+                className={`mb-4 p-4 rounded ${
+                  formMessage.type === 'error'
+                    ? 'bg-red-50 border-2 border-red-200 text-red-700'
+                    : 'bg-green-50 border-2 border-green-200 text-green-700'
+                }`}
+              >
+                {formMessage.text}
+              </div>
+            )}
             {/* Step 1: Dates & Guests */}
             {step === 1 && (
               <div className="space-y-6">
