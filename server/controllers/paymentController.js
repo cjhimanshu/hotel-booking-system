@@ -7,28 +7,32 @@ const razorpay = new Razorpay({
 });
 
 const logger = require('../utils/logger');
+const {
+  validatePositiveAmount,
+  normalizeCurrency,
+} = require('../utils/validator');
+
+const SUPPORTED_CURRENCIES = ['INR'];
 
 exports.createOrder = async (req, res) => {
   try {
     const { amount, currency = 'INR' } = req.body;
 
-    const normalizedAmount = Number(amount);
-    if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+    if (!validatePositiveAmount(amount)) {
       return res
         .status(400)
         .json({ message: 'Amount must be a positive number' });
     }
 
-    const normalizedCurrency = String(currency).toUpperCase();
-    const supportedCurrencies = ['INR'];
-    if (!supportedCurrencies.includes(normalizedCurrency)) {
+    const normalizedCurrency = normalizeCurrency(currency);
+    if (!SUPPORTED_CURRENCIES.includes(normalizedCurrency)) {
       return res.status(400).json({
-        message: `Unsupported currency. Allowed: ${supportedCurrencies.join(', ')}`,
+        message: `Unsupported currency. Allowed: ${SUPPORTED_CURRENCIES.join(', ')}`,
       });
     }
 
     const options = {
-      amount: Math.round(normalizedAmount * 100), // amount in smallest currency unit (paise)
+      amount: Math.round(Number(amount) * 100), // amount in smallest currency unit (paise)
       currency: normalizedCurrency,
       receipt: `receipt_${Date.now()}`,
     };
