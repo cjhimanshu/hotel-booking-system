@@ -10,7 +10,7 @@ const logger = require('../utils/logger');
 const {
   validatePositiveAmount,
   normalizeCurrency,
-} = require('../utils/validator');
+} = require('../utils/paymentValidation');
 
 const SUPPORTED_CURRENCIES = ['INR'];
 
