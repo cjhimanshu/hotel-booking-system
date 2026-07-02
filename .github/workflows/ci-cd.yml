@@ -36,16 +36,20 @@ jobs:
           cd ../client
           npm install
 
+      - name: Validate backend
+        run: |
+          cd server
+          npm test
+
+      - name: Run client tests
+        run: |
+          cd client
+          npm test
+
       - name: Run linter
         run: |
           cd client
           npm run lint
-
-      - name: Build backend
-        run: |
-          cd server
-          npm run build
-        continue-on-error: true
 
       - name: Build frontend
         run: |
@@ -60,12 +64,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Deploy to Render (Backend)
+      - name: Deploy backend to Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          echo "Deploying backend..."
-          # Add your deployment commands here
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Missing RENDER_DEPLOY_HOOK_URL secret"
+            exit 1
+          fi
+          curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
 
-      - name: Deploy to Vercel (Frontend)
+      - name: Deploy frontend to Vercel
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
         run: |
-          echo "Deploying frontend..."
-          # Add your deployment commands here
+          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
+            echo "Missing VERCEL_DEPLOY_HOOK_URL secret"
+            exit 1
+          fi
+          curl -fsSL -X POST "$VERCEL_DEPLOY_HOOK_URL"

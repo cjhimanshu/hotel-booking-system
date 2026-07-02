@@ -1,4 +1,10 @@
-const Room = require("../models/Room");
+const Room = require('../models/Room');
+
+const buildPublicUrl = (req, filePath) => {
+  const publicBaseUrl = process.env.PUBLIC_BASE_URL;
+  const origin = publicBaseUrl || `${req.protocol}://${req.get('host')}`;
+  return `${origin}/${filePath.replace(/\\/g, '/')}`;
+};
 
 exports.createRoom = async (req, res) => {
   try {
@@ -7,9 +13,7 @@ exports.createRoom = async (req, res) => {
     // If files are uploaded, use them
     if (req.files && req.files.length > 0) {
       // Convert file paths to full URLs accessible by frontend
-      images = req.files.map(
-        (file) => `http://localhost:5000/${file.path.replace(/\\/g, "/")}`
-      );
+      images = req.files.map((file) => buildPublicUrl(req, file.path));
     }
     // Otherwise, if a preset image URL is provided, use it
     else if (req.body.imageUrl) {
@@ -40,7 +44,7 @@ exports.getRoomById = async (req, res) => {
   try {
     const room = await Room.findById(req.params.id);
     if (!room) {
-      return res.status(404).json({ message: "Room not found" });
+      return res.status(404).json({ message: 'Room not found' });
     }
     res.json(room);
   } catch (error) {
@@ -51,7 +55,7 @@ exports.getRoomById = async (req, res) => {
 exports.deleteRoom = async (req, res) => {
   try {
     await Room.findByIdAndDelete(req.params.id);
-    res.json({ message: "Room deleted" });
+    res.json({ message: 'Room deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -64,14 +68,12 @@ exports.updateRoomImages = async (req, res) => {
     // If files are uploaded, use them
     if (req.files && req.files.length > 0) {
       // Convert file paths to full URLs accessible by frontend
-      images = req.files.map(
-        (file) => `http://localhost:5000/${file.path.replace(/\\/g, "/")}`
-      );
+      images = req.files.map((file) => buildPublicUrl(req, file.path));
     }
 
     const room = await Room.findById(req.params.id);
     if (!room) {
-      return res.status(404).json({ message: "Room not found" });
+      return res.status(404).json({ message: 'Room not found' });
     }
 
     // Add new images to existing ones

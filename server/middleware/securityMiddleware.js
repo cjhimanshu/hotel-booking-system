@@ -5,9 +5,13 @@ const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      scriptSrc: ["'self'", 'https://checkout.razorpay.com'],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'https://checkout.razorpay.com'],
+      frameSrc: ['https://checkout.razorpay.com'],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
     },
   },
   frameguard: {

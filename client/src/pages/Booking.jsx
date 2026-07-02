@@ -79,7 +79,9 @@ const Booking = () => {
         }
 
         const { data: orderData } = await API.post('/payment/create-order', {
-          amount: totalPrice,
+          room: id,
+          checkIn,
+          checkOut,
         });
         const { data: keyData } = await API.get('/payment/key');
 
@@ -156,7 +158,10 @@ const Booking = () => {
 
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response) {
-          setFormMessage({ type: 'error', text: 'Payment failed: ' + response.error.description });
+          setFormMessage({
+            type: 'error',
+            text: 'Payment failed: ' + response.error.description,
+          });
           setIsProcessing(false);
         });
         rzp.open();
@@ -167,7 +172,9 @@ const Booking = () => {
         console.error('Error initiating payment:', error);
         setFormMessage({
           type: 'error',
-          text: 'Could not initiate payment: ' + (error.response?.data?.message || error.message),
+          text:
+            'Could not initiate payment: ' +
+            (error.response?.data?.message || error.message),
         });
         setIsProcessing(false);
       }
@@ -187,13 +194,18 @@ const Booking = () => {
             specialRequests,
           },
         });
-        setFormMessage({ type: 'success', text: 'Booking confirmed! You can pay at the hotel.' });
+        setFormMessage({
+          type: 'success',
+          text: 'Booking confirmed! You can pay at the hotel.',
+        });
         navigate('/my-bookings');
       } catch (error) {
         console.error('Error booking room:', error);
         setFormMessage({
           type: 'error',
-          text: 'Error booking room: ' + (error.response?.data?.message || error.message),
+          text:
+            'Error booking room: ' +
+            (error.response?.data?.message || error.message),
         });
       } finally {
         setIsProcessing(false);
@@ -205,11 +217,17 @@ const Booking = () => {
     // Clear previous messages
     setFormMessage(null);
     if (step === 1 && (!checkIn || !checkOut)) {
-      setFormMessage({ type: 'error', text: 'Please select check-in and check-out dates' });
+      setFormMessage({
+        type: 'error',
+        text: 'Please select check-in and check-out dates',
+      });
       return;
     }
     if (step === 1 && !isDateRangeValid) {
-      setFormMessage({ type: 'error', text: 'Check-out date must be after check-in date' });
+      setFormMessage({
+        type: 'error',
+        text: 'Check-out date must be after check-in date',
+      });
       return;
     }
     // Validate guest count against room.maxGuests if available
@@ -219,18 +237,27 @@ const Booking = () => {
     }
     if (step === 2) {
       if (!guestName || !guestEmail) {
-        setFormMessage({ type: 'error', text: 'Please fill in all guest details' });
+        setFormMessage({
+          type: 'error',
+          text: 'Please fill in all guest details',
+        });
         return;
       }
       // Basic name validation
       if (guestName.trim().length < 2) {
-        setFormMessage({ type: 'error', text: 'Please enter a valid name (at least 2 characters)' });
+        setFormMessage({
+          type: 'error',
+          text: 'Please enter a valid name (at least 2 characters)',
+        });
         return;
       }
       // Basic email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(guestEmail)) {
-        setFormMessage({ type: 'error', text: 'Please enter a valid email address' });
+        setFormMessage({
+          type: 'error',
+          text: 'Please enter a valid email address',
+        });
         return;
       }
     }

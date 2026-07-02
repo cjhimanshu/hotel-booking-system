@@ -60,11 +60,9 @@ exports.createBooking = async (req, res) => {
       Number.isFinite(Number(numberOfGuests)) &&
       Number(numberOfGuests) > roomData.maxGuests
     ) {
-      return res
-        .status(400)
-        .json({
-          message: `Maximum ${roomData.maxGuests} guests allowed for this room`,
-        });
+      return res.status(400).json({
+        message: `Maximum ${roomData.maxGuests} guests allowed for this room`,
+      });
     }
 
     const existingBookings = await Booking.find({
@@ -88,6 +86,7 @@ exports.createBooking = async (req, res) => {
     }
 
     const days = (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
+    const authoritativeTotalPrice = days * roomData.price;
 
     const booking = await Booking.create({
       user: req.user.id,
@@ -95,10 +94,7 @@ exports.createBooking = async (req, res) => {
       checkIn: checkInDate,
       checkOut: checkOutDate,
       numberOfGuests: numberOfGuests || 1,
-      totalPrice:
-        Number.isFinite(Number(totalPrice)) && Number(totalPrice) > 0
-          ? Number(totalPrice)
-          : days * roomData.price,
+      totalPrice: authoritativeTotalPrice,
       paymentMethod: paymentMethod || 'credit_card',
       paymentStatus: paymentMethod === 'cash' ? 'pending' : 'paid',
       status: 'confirmed',

@@ -1,5 +1,6 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const Room = require('../models/Room');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -16,12 +17,45 @@ const SUPPORTED_CURRENCIES = ['INR'];
 
 exports.createOrder = async (req, res) => {
   try {
-    const { amount, currency = 'INR' } = req.body;
+    const { room, checkIn, checkOut, currency = 'INR' } = req.body;
+
+    if (!room || !checkIn || !checkOut) {
+      return res.status(400).json({
+        message:
+          'Room, check-in, and check-out are required to create a payment order',
+      });
+    }
+
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    if (
+      Number.isNaN(checkInDate.getTime()) ||
+      Number.isNaN(checkOutDate.getTime())
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid check-in or check-out date' });
+    }
+
+    if (checkOutDate <= checkInDate) {
+      return res
+        .status(400)
+        .json({ message: 'Check-out date must be after check-in date' });
+    }
+
+    const roomData = await Room.findById(room);
+    if (!roomData) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
+    const nights = (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
+    const amount = nights * roomData.price;
 
     if (!validatePositiveAmount(amount)) {
       return res
         .status(400)
-        .json({ message: 'Amount must be a positive number' });
+        .json({ message: 'Calculated amount must be a positive number' });
     }
 
     const normalizedCurrency = normalizeCurrency(currency);

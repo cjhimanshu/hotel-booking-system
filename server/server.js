@@ -6,6 +6,8 @@ const fs = require('fs');
 const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 const logger = require('./utils/logger');
+const securityHeaders = require('./middleware/securityMiddleware');
+const compressionMiddleware = require('./middleware/compressionMiddleware');
 
 // Ensure uploads directory exists (important for Render deployments)
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -48,6 +50,8 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions));
+app.use(securityHeaders);
+app.use(compressionMiddleware);
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use('/', require('./routes/healthRoutes'));
