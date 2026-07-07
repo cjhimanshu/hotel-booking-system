@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Room = require('../models/Room');
+const AppError = require('../utils/AppError');
 
 const hasDateOverlap = (
   existingCheckIn,
@@ -10,7 +11,42 @@ const hasDateOverlap = (
   return existingCheckIn < newCheckOut && existingCheckOut > newCheckIn;
 };
 
-exports.createBooking = async (req, res) => {
+/**
+ * Validates that check-in/check-out dates are reasonable
+ * @throws {AppError} if dates are invalid
+ */
+const validateBookingDates = (checkInDate, checkOutDate) => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  // Check-in cannot be in the past
+  if (checkInDate < now) {
+    throw new AppError('Check-in date cannot be in the past', 400, {
+      checkInDate,
+      now,
+    });
+  }
+
+  // Check-out must be after check-in
+  if (checkOutDate <= checkInDate) {
+    throw new AppError('Check-out date must be after check-in date', 400, {
+      checkInDate,
+      checkOutDate,
+    });
+  }
+
+  // Limit booking to 90 days max
+  const maxBookingDays = 90;
+  const bookingDays = (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
+  if (bookingDays > maxBookingDays) {
+    throw new AppError(`Booking cannot exceed ${maxBookingDays} days`, 400, {
+      bookingDays,
+      maxBookingDays,
+    });
+  }
+};
+
+exports.createBooking = async (req, res, next) => {
   try {
     const {
       room,
@@ -23,9 +59,7 @@ exports.createBooking = async (req, res) => {
     } = req.body;
 
     if (!room || !checkIn || !checkOut) {
-      return res
-        .status(400)
-        .json({ message: 'Room, check-in, and check-out are required' });
+      throw new AppError('Room, check-in, and check-out are required', 400);
     }
 
     const checkInDate = new Date(checkIn);
@@ -35,24 +69,19 @@ exports.createBooking = async (req, res) => {
       Number.isNaN(checkInDate.getTime()) ||
       Number.isNaN(checkOutDate.getTime())
     ) {
-      return res
-        .status(400)
-        .json({ message: 'Invalid check-in or check-out date' });
+      throw new AppError('Invalid check-in or check-out date', 400);
     }
 
-    if (checkOutDate <= checkInDate) {
-      return res
-        .status(400)
-        .json({ message: 'Check-out date must be after check-in date' });
-    }
+    // Validate date ranges
+    validateBookingDates(checkInDate, checkOutDate);
 
     const roomData = await Room.findById(room);
     if (!roomData) {
-      return res.status(404).json({ message: 'Room not found' });
+      throw new AppError('Room not found', 404);
     }
 
     if (!roomData.isAvailable) {
-      return res.status(409).json({ message: 'Room is not available' });
+      throw new AppError('Room is not available', 409);
     }
 
     if (
@@ -60,9 +89,10 @@ exports.createBooking = async (req, res) => {
       Number.isFinite(Number(numberOfGuests)) &&
       Number(numberOfGuests) > roomData.maxGuests
     ) {
-      return res.status(400).json({
-        message: `Maximum ${roomData.maxGuests} guests allowed for this room`,
-      });
+      throw new AppError(
+        `Maximum ${roomData.maxGuests} guests allowed for this room`,
+        400
+      );
     }
 
     const existingBookings = await Booking.find({
@@ -82,7 +112,7 @@ exports.createBooking = async (req, res) => {
     );
 
     if (hasConflict) {
-      return res.status(409).json({ message: 'Room not available' });
+      throw new AppError('Room not available for selected dates', 409);
     }
 
     const days = (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24);
@@ -103,38 +133,39 @@ exports.createBooking = async (req, res) => {
 
     res.status(201).json(booking);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.getUserBookings = async (req, res) => {
+exports.getUserBookings = async (req, res, next) => {
   try {
     const bookings = await Booking.find({ user: req.user.id }).populate('room');
     res.json(bookings);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.cancelBooking = async (req, res) => {
+exports.cancelBooking = async (req, res, next) => {
   try {
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      throw new AppError('Booking not found', 404);
     }
 
     const isAdmin = req.user.role === 'admin';
     const isOwner = booking.user.toString() === req.user.id;
 
     if (!isOwner && !isAdmin) {
-      return res
-        .status(403)
-        .json({ message: 'Not authorized to cancel this booking' });
+      throw new AppError('Not authorized to cancel this booking', 403, {
+        bookingId: req.params.id,
+        userId: req.user.id,
+      });
     }
 
     if (booking.status === 'cancelled') {
-      return res.status(200).json(booking);
+      return res.json(booking);
     }
 
     booking.status = 'cancelled';
@@ -145,7 +176,7 @@ exports.cancelBooking = async (req, res) => {
     await booking.save();
     res.json(booking);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 

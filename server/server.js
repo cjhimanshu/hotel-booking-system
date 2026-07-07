@@ -8,6 +8,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const logger = require('./utils/logger');
 const securityHeaders = require('./middleware/securityMiddleware');
 const compressionMiddleware = require('./middleware/compressionMiddleware');
+const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
 // Ensure uploads directory exists (important for Render deployments)
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -78,6 +79,11 @@ try {
 } catch (error) {
   logger.error('Error loading payment routes:', error.message);
 }
+
+// Error handling middleware
+// Must be after all route definitions
+app.use(notFound);
+app.use(errorHandler);
 
 // For Vercel serverless
 if (process.env.VERCEL) {
