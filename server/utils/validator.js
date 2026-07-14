@@ -9,8 +9,14 @@ const validatePassword = (password) => {
 };
 
 const validatePhoneNumber = (phone) => {
-  const phoneRegex = /^[0-9]{10}$/;
-  return phoneRegex.test(phone.replace(/\D/g, ''));
+  // Accept various formats: +91 9876543210, 9876543210, +919876543210, etc.
+  const cleaned = phone.replace(/\D/g, '');
+  return cleaned.length >= 10 && cleaned.length <= 15;
+};
+
+const validateOtp = (otp) => {
+  // OTP should be exactly 6 digits
+  return /^\d{6}$/.test(otp.toString());
 };
 
 const sanitizeInput = (input) => {
@@ -28,6 +34,7 @@ module.exports = {
   validateEmail,
   validatePassword,
   validatePhoneNumber,
+  validateOtp,
   sanitizeInput,
   validateDateRange,
 };

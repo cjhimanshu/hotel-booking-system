@@ -4,101 +4,147 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 const logger = require('../utils/logger');
+const { validateEmail, validatePassword } = require('../utils/validator');
+const AppError = require('../utils/AppError');
 
-exports.register = async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body;
+// Helper to wrap async controllers
+const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+exports.register = asyncHandler(async (req, res, next) => {
+  const { name, email, password } = req.body;
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role: role || 'user', // Allow setting role during registration
-    });
-
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  // Input validation
+  if (!name || !email || !password) {
+    return next(new AppError('Name, email, and password are required', 400));
   }
-};
 
-exports.login = async (req, res) => {
-  try {
-    const { email, password, role } = req.body;
+  if (!validateEmail(email)) {
+    return next(new AppError('Invalid email format', 400));
+  }
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'User not found' });
+  if (!validatePassword(password)) {
+    return next(
+      new AppError('Password must be at least 6 characters long', 400)
+    );
+  }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Wrong password' });
+  // Check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(new AppError('Email already registered', 409));
+  }
 
-    // Verify the selected role matches the user's actual role
-    if (role && user.role !== role) {
-      return res.status(403).json({
-        message: `This account is registered as ${
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Always register as 'user' - admin role can only be set by existing admins
+  const user = await User.create({
+    name: name.trim(),
+    email: email.toLowerCase().trim(),
+    password: hashedPassword,
+    role: 'user', // Force user role, never allow role override in registration
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Registration successful. Please verify your email.',
+    user: { id: user._id, email: user.email, name: user.name },
+  });
+});
+
+exports.login = asyncHandler(async (req, res, next) => {
+  const { email, password, role } = req.body;
+
+  // Input validation
+  if (!email || !password) {
+    return next(new AppError('Email and password are required', 400));
+  }
+
+  if (!validateEmail(email)) {
+    return next(new AppError('Invalid email format', 400));
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError('Invalid email or password', 401));
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return next(new AppError('Invalid email or password', 401));
+  }
+
+  // Verify the selected role matches the user's actual role
+  if (role && user.role !== role) {
+    return next(
+      new AppError(
+        `This account is registered as ${
           user.role === 'admin' ? 'Hotel Admin' : 'Guest/User'
         }. Please select the correct login type.`,
-      });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET
+        403
+      )
     );
+  }
 
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET
+  );
+
+  res.json({
+    success: true,
+    message: 'Login successful',
+    token,
+    user: { id: user._id, email: user.email, name: user.name, role: user.role },
+  });
+});
+
+exports.getProfile = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('-password');
+  if (!user) {
+    return next(new AppError('User not found', 404));
   }
-};
-exports.getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  res.json({ success: true, user });
+});
 
 // POST /api/auth/forgot-password
-exports.forgotPassword = async (req, res) => {
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email || !validateEmail(email)) {
+    return next(new AppError('Valid email is required', 400));
+  }
+
+  const user = await User.findOne({ email });
+
+  // Always respond with success to prevent email enumeration
+  if (!user) {
+    return res.json({
+      success: true,
+      message: 'If that email exists, a reset link has been sent.',
+    });
+  }
+
+  // Generate a secure random token
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(rawToken)
+    .digest('hex');
+
+  user.resetPasswordToken = hashedToken;
+  user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+  await user.save();
+
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${rawToken}`;
+
+  logger.debug('Password reset requested for:', { email: user.email });
+
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-
-    // Always respond with success to prevent email enumeration
-    if (!user) {
-      return res.json({
-        message: 'If that email exists, a reset link has been sent.',
-      });
-    }
-
-    // Generate a secure random token
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(rawToken)
-      .digest('hex');
-
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
-    await user.save();
-
-    const resetUrl = `${
-      process.env.FRONTEND_URL || 'http://localhost:5173'
-    }/reset-password/${rawToken}`;
-
-    // Log using the central logger. Use debug level so URLs aren't exposed in production.
-    logger.debug('Password reset requested for:', { email: user.email });
-    logger.debug('Reset URL (valid 1 hour):', { url: resetUrl });
-
-    try {
-      await sendEmail({
-        to: user.email,
-        subject: 'Password Reset Request – Luxury Stay',
-        html: `
+    await sendEmail({
+      to: user.email,
+      subject: 'Password Reset Request – Luxury Stay',
+      html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
           <h2 style="color:#1d4ed8;">🏨 Luxury Stay – Password Reset</h2>
           <p>Hi <strong>${user.name}</strong>,</p>
@@ -109,73 +155,59 @@ exports.forgotPassword = async (req, res) => {
               Reset Password
             </a>
           </div>
-          <p style="color:#6b7280;font-size:14px;">Or copy this link: <a href="${resetUrl}">${resetUrl}</a></p>
           <p style="color:#6b7280;font-size:14px;">This link expires in <strong>1 hour</strong>.</p>
           <p style="color:#6b7280;font-size:14px;">If you didn't request this, you can safely ignore this email.</p>
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
           <p style="color:#9ca3af;font-size:12px;">Luxury Stay Hotel Booking System</p>
         </div>
       `,
-      });
-      return res.json({
-        message: 'If that email exists, a reset link has been sent.',
-      });
-    } catch (emailError) {
-      if (emailError.message === 'EMAIL_NOT_CONFIGURED') {
-        // Token is saved — dev can use the console URL to test the flow
-        return res.status(503).json({
-          message:
-            'Email service is not configured. Please set EMAIL_USER and EMAIL_PASS in server/.env (Gmail App Password required). Check the server console for the reset link.',
-        });
-      }
-      // Real SMTP / auth error
-      logger.error('SMTP send error:', { message: emailError.message });
-      return res.status(500).json({
-        message:
-          'Failed to send reset email. Please verify your EMAIL_USER and EMAIL_PASS (must be a Gmail App Password). Check server logs for details.',
-      });
+    });
+    res.json({
+      success: true,
+      message: 'If that email exists, a reset link has been sent.',
+    });
+  } catch (emailError) {
+    if (emailError.message === 'EMAIL_NOT_CONFIGURED') {
+      return next(
+        new AppError('Email service not configured. Check server logs.', 503)
+      );
     }
-  } catch (error) {
-    logger.error('Forgot password error:', { error });
-    res
-      .status(500)
-      .json({ message: 'Failed to send reset email. Please try again.' });
+    logger.error('SMTP send error:', { message: emailError.message });
+    return next(
+      new AppError('Failed to send reset email. Please try again.', 500)
+    );
   }
-};
+});
 
 // POST /api/auth/reset-password/:token
-exports.resetPassword = async (req, res) => {
-  try {
-    const { token } = req.params;
-    const { password } = req.body;
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
 
-    if (!password || password.length < 6) {
-      return res
-        .status(400)
-        .json({ message: 'Password must be at least 6 characters.' });
-    }
-
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: 'Reset link is invalid or has expired.' });
-    }
-
-    user.password = await bcrypt.hash(password, 10);
-    user.resetPasswordToken = null;
-    user.resetPasswordExpires = null;
-    await user.save();
-
-    res.json({ message: 'Password reset successful. You can now log in.' });
-  } catch (error) {
-    logger.error('Reset password error:', { error });
-    res.status(500).json({ message: error.message });
+  if (!password || !validatePassword(password)) {
+    return next(
+      new AppError('Password must be at least 6 characters long', 400)
+    );
   }
-};
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new AppError('Reset link is invalid or has expired', 400));
+  }
+
+  user.password = await bcrypt.hash(password, 10);
+  user.resetPasswordToken = null;
+  user.resetPasswordExpires = null;
+  await user.save();
+
+  res.json({
+    success: true,
+    message: 'Password reset successful. You can now log in.',
+  });
+});
