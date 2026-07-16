@@ -45,6 +45,12 @@ const checkSyntax = () => {
   return filesToCheck.length;
 };
 
+const createFutureDate = (daysFromNow) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  return date.toISOString().slice(0, 10);
+};
+
 const createMockResponse = () => {
   const response = {
     statusCode: 200,
@@ -209,8 +215,8 @@ const testBookingController = () => {
         user: { id: 'user_1' },
         body: {
           room: 'room_1',
-          checkIn: '2026-07-01',
-          checkOut: '2026-07-03',
+          checkIn: createFutureDate(7),
+          checkOut: createFutureDate(9),
           numberOfGuests: 2,
           paymentMethod: 'razorpay',
           totalPrice: 1,
